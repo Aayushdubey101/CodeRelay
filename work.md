@@ -117,8 +117,8 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
   *Acceptance:* `docs/reuse-map.md` covers all 4 repos with concrete file references. (2026-04-29)
 * [x] **0.5** Copy LICENSE files from each upstream repo into `LICENSES/<project>-LICENSE.txt`. Create `NOTICE.md` listing them.
   *Acceptance:* Both files present and accurate. (2026-04-29)
-* [ ] **0.6** CI: GitHub Actions running `lint + typecheck + test` on push.
-  *Acceptance:* Green check on a no-op commit.
+* [x] **0.6** CI: GitHub Actions running `lint + typecheck + test` on push.
+  *Acceptance:* Green check on a no-op commit. (2026-04-29)
 * [ ] **0.7** Logging: Pino, pretty in dev, JSON in prod. One logger per package.
   *Acceptance:* `import { log } from "@coderelay/core"; log.info("hi")` prints.
 

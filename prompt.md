@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 0 — Setup & Reuse Audit
-**Next concrete task:** `0.6 CI: GitHub Actions`
+**Next concrete task:** `0.7 Logging (Pino)`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,21 +74,23 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        0.6
-Title:     CI — GitHub Actions
-From:      work.md → Phase 0 → 0.6
-Acceptance: Green check on a no-op commit pushed to GitHub.
+ID:        0.7
+Title:     Logging (Pino)
+From:      work.md → Phase 0 → 0.7
+Acceptance: `import { log } from "@coderelay/core"; log.info("hi")` prints.
 Sub-steps:
-  1. Create .github/workflows/ci.yml
-     - Trigger: push + pull_request on main
-     - Job: ubuntu-latest, Node 20, pnpm
-     - Steps: install → typecheck (pnpm -r typecheck) → test (pnpm -r test, allow empty)
-  2. Add lint step: pnpm exec eslint packages --ext .ts (no-op until ESLint added)
-     OR skip lint until 0.7 — just typecheck + test for now
-  3. Push to GitHub remote (needs remote to be set)
-  4. Confirm green check
+  1. Add pino + pino-pretty to packages/core devDependencies
+  2. Create packages/core/src/logger.ts — exports `log` (pino instance)
+     - dev: pretty transport (human-readable)
+     - prod: JSON (NODE_ENV=production)
+     - name field = "@coderelay/core"
+  3. Re-export log from packages/core/src/index.ts
+  4. Add a smoke test: packages/core/src/logger.test.ts — log.info("hi") doesn't throw
+  5. Each other package adds pino dep + creates its own logger.ts (name = package name)
+  6. Run pnpm -r typecheck → exits 0
+  7. Commit: "feat: add Pino logging to all packages"
 
-When 0.6 passes, update CURRENT TASK to 0.7 and STOP.
+When 0.7 passes, update CURRENT TASK to Phase 1 (task 1.1) and STOP.
 ```
 
 ---
@@ -100,6 +102,7 @@ When 0.6 passes, update CURRENT TASK to 0.7 and STOP.
 - 2026-04-29: Task 0.3 complete — 4 submodules pinned: claude-context@3675469, graphify@28b17d3, cao@1f2a048, context-mode@f00a1ab. All READMEs readable.
 - 2026-04-29: Task 0.4 complete — docs/reuse-map.md written. Key finding: context-mode is ELv2 (study-only, no copy). claude-context+graphify+cao all MIT/Apache-2.0. Concrete file-to-target table for all 4 repos with adaptation notes.
 - 2026-04-29: Task 0.5 complete — 5 LICENSE files copied to LICENSES/. NOTICE.md updated with real SHAs, license types, usage descriptions. cao-NOTICE.txt included per Apache 2.0 requirement.
+- 2026-04-29: Task 0.6 complete — .github/workflows/ci.yml created (ubuntu/Node20/pnpm10, typecheck+test). vitest installed with --passWithNoTests. Pushed to github.com/Aayushdubey101/CodeRelay @ d90122b.
 
 ---
 
