@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 0 — Setup & Reuse Audit
-**Next concrete task:** `0.2 Monorepo workspaces`
+**Next concrete task:** `0.3 Clone upstream submodules`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,24 +74,20 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        0.2
-Title:     Monorepo workspaces
-From:      work.md → Phase 0 → 0.2
-Acceptance: `pnpm -r build` succeeds with empty packages.
+ID:        0.3
+Title:     Clone upstream repos as git submodules
+From:      work.md → Phase 0 → 0.3
+Acceptance: All submodules clone, `external/<repo>/README.md` readable.
 Sub-steps:
-  1. Add `pnpm-workspace.yaml` pointing to `packages/*`
-  2. Create stub package directories (each with package.json + tsconfig.json):
-       packages/core, packages/indexer, packages/memory, packages/router,
-       packages/governor, packages/mcp-server, packages/sub-agents, packages/cli
-  3. Each package name: `@coderelay/<name>`, version `0.0.0`, private, type `module`
-  4. Each package tsconfig.json extends root `../../tsconfig.json`
-  5. Each package has a `build` script: `tsc -p tsconfig.json`
-  6. Each package has a stub `src/index.ts` exporting nothing
-  7. Add `docs/`, `LICENSES/`, `tests/`, `benchmarks/` directories (`.gitkeep`)
-  8. Run `pnpm -r build` → must exit 0
-  9. Commit: "chore: set up monorepo workspaces"
+  1. git submodule add https://github.com/zilliztech/claude-context        external/claude-context
+  2. git submodule add https://github.com/safishamsi/graphify              external/graphify
+  3. git submodule add https://github.com/awslabs/cli-agent-orchestrator   external/cao
+  4. git submodule add https://github.com/mksglu/context-mode              external/context-mode
+  5. Pin each submodule to a specific commit SHA (do NOT track main)
+  6. Verify each external/<repo>/README.md exists
+  7. Commit: "chore: add upstream submodules"
 
-When 0.2 passes, update CURRENT TASK to 0.3 and STOP.
+When 0.3 passes, update CURRENT TASK to 0.4 and STOP.
 ```
 
 ---
@@ -99,6 +95,7 @@ When 0.2 passes, update CURRENT TASK to 0.3 and STOP.
 ## 📅 DONE THIS SESSION
 
 - 2026-04-29: Task 0.1 complete — pnpm init, tsconfig (strict/ESNext/NodeNext), .gitignore, .gitattributes, .editorconfig, MIT LICENSE, src/index.ts stub, moved docs to docs/. `pnpm tsc --noEmit` exits 0. Initial commit `f0e0f20`.
+- 2026-04-29: Task 0.2 complete — pnpm-workspace.yaml, 8 packages (core/indexer/memory/router/governor/mcp-server/sub-agents/cli) each with package.json + tsconfig + stub src/index.ts. LICENSES/, tests/, benchmarks/ dirs. `pnpm -r build` exits 0.
 
 ---
 

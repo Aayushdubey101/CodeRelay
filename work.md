@@ -87,7 +87,7 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
 
 * [x] **0.1** Initialize repo: `pnpm init`, `tsconfig.json` (strict, ESNext, NodeNext), `.gitignore` (node_modules, dist, .env, *.db, .lance/, .coderelay/), `.editorconfig`, MIT LICENSE, stub README.md.
   *Acceptance:* `pnpm tsc --noEmit` exits 0. (2026-04-29)
-* [ ] **0.2** Set up monorepo with pnpm workspaces:
+* [x] **0.2** Set up monorepo with pnpm workspaces: (2026-04-29)
   ```
   /packages
     /core         — orchestrator + glue
