@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 0 — Setup & Reuse Audit
-**Next concrete task:** `0.3 Clone upstream submodules`
+**Next concrete task:** `0.4 Reuse audit document`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,20 +74,18 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        0.3
-Title:     Clone upstream repos as git submodules
-From:      work.md → Phase 0 → 0.3
-Acceptance: All submodules clone, `external/<repo>/README.md` readable.
+ID:        0.4
+Title:     Reuse audit document
+From:      work.md → Phase 0 → 0.4
+Acceptance: docs/reuse-map.md covers all 4 repos with concrete file references.
 Sub-steps:
-  1. git submodule add https://github.com/zilliztech/claude-context        external/claude-context
-  2. git submodule add https://github.com/safishamsi/graphify              external/graphify
-  3. git submodule add https://github.com/awslabs/cli-agent-orchestrator   external/cao
-  4. git submodule add https://github.com/mksglu/context-mode              external/context-mode
-  5. Pin each submodule to a specific commit SHA (do NOT track main)
-  6. Verify each external/<repo>/README.md exists
-  7. Commit: "chore: add upstream submodules"
+  1. Read external/claude-context, external/graphify, external/cao,
+     external/context-mode source trees
+  2. For each repo: list files to copy/port, files to skip, and adaptation notes
+  3. Write docs/reuse-map.md with structured table per repo
+  4. Commit: "docs: reuse audit map"
 
-When 0.3 passes, update CURRENT TASK to 0.4 and STOP.
+When 0.4 passes, update CURRENT TASK to 0.5 and STOP.
 ```
 
 ---
@@ -96,6 +94,7 @@ When 0.3 passes, update CURRENT TASK to 0.4 and STOP.
 
 - 2026-04-29: Task 0.1 complete — pnpm init, tsconfig (strict/ESNext/NodeNext), .gitignore, .gitattributes, .editorconfig, MIT LICENSE, src/index.ts stub, moved docs to docs/. `pnpm tsc --noEmit` exits 0. Initial commit `f0e0f20`.
 - 2026-04-29: Task 0.2 complete — pnpm-workspace.yaml, 8 packages (core/indexer/memory/router/governor/mcp-server/sub-agents/cli) each with package.json + tsconfig + stub src/index.ts. LICENSES/, tests/, benchmarks/ dirs. `pnpm -r build` exits 0.
+- 2026-04-29: Task 0.3 complete — 4 submodules pinned: claude-context@3675469, graphify@28b17d3, cao@1f2a048, context-mode@f00a1ab. All READMEs readable.
 
 ---
 

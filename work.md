@@ -105,7 +105,7 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
   /external      — git submodules of upstream repos for reference
   ```
   *Acceptance:* `pnpm -r build` succeeds with empty packages.
-* [ ] **0.3** **Clone upstream repos as git submodules** for reference:
+* [x] **0.3** **Clone upstream repos as git submodules** for reference: (2026-04-29)
   ```
   git submodule add https://github.com/zilliztech/claude-context        external/claude-context
   git submodule add https://github.com/safishamsi/graphify              external/graphify
