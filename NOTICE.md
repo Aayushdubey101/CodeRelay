@@ -16,7 +16,7 @@ file in `packages/` carries an attribution header pointing back to its origin.
   indexer, embeddings provider abstraction
 - **Modifications:** Replaced Milvus vector backend with LanceDB; added graph
   layer; replaced 4 tools with our 10
-- **Pinned commit:** *(fill in after submodule add)*
+- **Pinned commit:** `367546904b5bcd1d7138a6ae5ca253c8cb0680a1`
 
 ### safishamsi/graphify
 - **License:** MIT
@@ -25,23 +25,26 @@ file in `packages/` carries an attribution header pointing back to its origin.
 - **Used for:** Per-language tree-sitter symbol & call-graph extraction logic
 - **Modifications:** Ported from Python to TypeScript; output goes to SQLite
   schema instead of NetworkX/JSON
-- **Pinned commit:** *(fill in after submodule add)*
+- **Pinned commit:** `28b17d37f145701d7c6396375cabf7028ba449b3`
 
 ### awslabs/cli-agent-orchestrator (CAO)
 - **License:** Apache 2.0
 - **Source:** <https://github.com/awslabs/cli-agent-orchestrator>
 - **License file:** `LICENSES/cao-LICENSE.txt`
-- **Used for:** Reference for sub-agent provider abstraction patterns
-- **Modifications:** Reimplemented in TypeScript; adapted to our governor layer
-- **Pinned commit:** *(fill in after submodule add)*
+- **Additional NOTICE:** `LICENSES/cao-NOTICE.txt` (required by Apache 2.0)
+- **Used for:** Sub-agent provider abstraction patterns; session lifecycle design
+- **Modifications:** Logic ported from Python to TypeScript; tmux replaced with
+  execa subprocess management; adapted to our governor layer
+- **Pinned commit:** `1f2a0487810ea6aaa44fe9c09ca81e7dd5621b52`
 
 ### mksglu/context-mode
-- **License:** *(verify on first clone)*
+- **License:** Elastic License 2.0 (ELv2) — **no code copied**
 - **Source:** <https://github.com/mksglu/context-mode>
 - **License file:** `LICENSES/context-mode-LICENSE.txt`
-- **Used for:** Pattern reference only — MCP-layer hook redirection design
-- **Modifications:** Concept only; no code copied
-- **Pinned commit:** *(fill in after submodule add)*
+- **Used for:** Design study only — command security evaluator pattern,
+  session DB schema, agent hook injection architecture
+- **Modifications:** None — all equivalent functionality built from scratch
+- **Pinned commit:** `f00a1abc83aeeb137ae137f3068fff74884d97c6`
 
 ---
 

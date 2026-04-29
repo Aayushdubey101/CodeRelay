@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 0 — Setup & Reuse Audit
-**Next concrete task:** `0.5 Copy LICENSE files + NOTICE.md`
+**Next concrete task:** `0.6 CI: GitHub Actions`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,22 +74,21 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        0.5
-Title:     Copy LICENSE files + NOTICE.md
-From:      work.md → Phase 0 → 0.5
-Acceptance: LICENSES/<project>-LICENSE.txt present for all 4 upstreams; NOTICE.md
-            lists all of them accurately.
+ID:        0.6
+Title:     CI — GitHub Actions
+From:      work.md → Phase 0 → 0.6
+Acceptance: Green check on a no-op commit pushed to GitHub.
 Sub-steps:
-  1. Copy external/claude-context/LICENSE  → LICENSES/claude-context-LICENSE.txt
-  2. Copy external/graphify/LICENSE        → LICENSES/graphify-LICENSE.txt
-  3. Copy external/cao/LICENSE             → LICENSES/cao-LICENSE.txt
-  4. Copy external/cao/NOTICE              → LICENSES/cao-NOTICE.txt  (Apache 2.0 requires this)
-  5. Copy external/context-mode/LICENSE    → LICENSES/context-mode-LICENSE.txt
-     (ELv2 — copy for reference even though we study-only; confirms we know the license)
-  6. Update NOTICE.md to list all 4 upstreams with pinned SHA + license + usage type
-  7. Commit: "chore: copy upstream LICENSE files and update NOTICE"
+  1. Create .github/workflows/ci.yml
+     - Trigger: push + pull_request on main
+     - Job: ubuntu-latest, Node 20, pnpm
+     - Steps: install → typecheck (pnpm -r typecheck) → test (pnpm -r test, allow empty)
+  2. Add lint step: pnpm exec eslint packages --ext .ts (no-op until ESLint added)
+     OR skip lint until 0.7 — just typecheck + test for now
+  3. Push to GitHub remote (needs remote to be set)
+  4. Confirm green check
 
-When 0.5 passes, update CURRENT TASK to 0.6 and STOP.
+When 0.6 passes, update CURRENT TASK to 0.7 and STOP.
 ```
 
 ---
@@ -100,6 +99,7 @@ When 0.5 passes, update CURRENT TASK to 0.6 and STOP.
 - 2026-04-29: Task 0.2 complete — pnpm-workspace.yaml, 8 packages (core/indexer/memory/router/governor/mcp-server/sub-agents/cli) each with package.json + tsconfig + stub src/index.ts. LICENSES/, tests/, benchmarks/ dirs. `pnpm -r build` exits 0.
 - 2026-04-29: Task 0.3 complete — 4 submodules pinned: claude-context@3675469, graphify@28b17d3, cao@1f2a048, context-mode@f00a1ab. All READMEs readable.
 - 2026-04-29: Task 0.4 complete — docs/reuse-map.md written. Key finding: context-mode is ELv2 (study-only, no copy). claude-context+graphify+cao all MIT/Apache-2.0. Concrete file-to-target table for all 4 repos with adaptation notes.
+- 2026-04-29: Task 0.5 complete — 5 LICENSE files copied to LICENSES/. NOTICE.md updated with real SHAs, license types, usage descriptions. cao-NOTICE.txt included per Apache 2.0 requirement.
 
 ---
 
