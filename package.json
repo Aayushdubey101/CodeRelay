@@ -1,0 +1,23 @@
+{
+  "name": "coderelay",
+  "version": "0.0.0",
+  "description": "CLI orchestrator wrapping coding agents with shared codebase graph, memory, and governance",
+  "license": "MIT",
+  "author": "Aayush Dubey",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint packages --ext .ts",
+    "clean": "rimraf dist packages/*/dist"
+  },
+  "packageManager": "pnpm@10.30.3",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

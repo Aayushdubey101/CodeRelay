@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+external/*/node_modules/
+external/*/dist/
+
+# Build output
+dist/
+packages/*/dist/
+*.js.map
+*.d.ts.map
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Runtime / storage
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.lance/
+.coderelay/
+.coderelay-cache/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# pnpm
+.pnpm-store/
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# Temp
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Claude Code harness working directory
+mnt/
+.claude/settings.local.json
