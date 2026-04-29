@@ -113,8 +113,8 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
   git submodule add https://github.com/mksglu/context-mode              external/context-mode
   ```
   *Acceptance:* All submodules clone, `external/<repo>/README.md` readable.
-* [ ] **0.4** **Reuse audit document** — read each upstream repo and write `docs/reuse-map.md` listing exactly which files we plan to copy/port and what we'll skip.
-  *Acceptance:* `docs/reuse-map.md` covers all 4 repos with concrete file references.
+* [x] **0.4** **Reuse audit document** — read each upstream repo and write `docs/reuse-map.md` listing exactly which files we plan to copy/port and what we'll skip.
+  *Acceptance:* `docs/reuse-map.md` covers all 4 repos with concrete file references. (2026-04-29)
 * [ ] **0.5** Copy LICENSE files from each upstream repo into `LICENSES/<project>-LICENSE.txt`. Create `NOTICE.md` listing them.
   *Acceptance:* Both files present and accurate.
 * [ ] **0.6** CI: GitHub Actions running `lint + typecheck + test` on push.
