@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 0 — Setup & Reuse Audit
-**Next concrete task:** `0.1 Initialize repo`
+**Next concrete task:** `0.2 Monorepo workspaces`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,30 +74,31 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        0.1
-Title:     Initialize repo
-From:      work.md → Phase 0 → 0.1
-Acceptance: `pnpm tsc --noEmit` runs clean on an empty TypeScript project at
-            the repo root.
+ID:        0.2
+Title:     Monorepo workspaces
+From:      work.md → Phase 0 → 0.2
+Acceptance: `pnpm -r build` succeeds with empty packages.
 Sub-steps:
-  1. `pnpm init` (set name = "coderelay", license = "MIT", version = "0.0.0")
-  2. Add `tsconfig.json` (strict, ESNext, NodeNext modules, outDir = "dist")
-  3. Add `.gitignore` (node_modules, dist, .env, *.db, .lance/, .coderelay/,
-     external/*/node_modules, external/*/dist)
-  4. Add stub README.md (one paragraph + link to work.md + reuse strategy note)
-  5. Add MIT LICENSE file
-  6. Add `.editorconfig`
-  7. Run `pnpm tsc --noEmit` → must exit 0
-  8. Initial commit: "chore: bootstrap project"
+  1. Add `pnpm-workspace.yaml` pointing to `packages/*`
+  2. Create stub package directories (each with package.json + tsconfig.json):
+       packages/core, packages/indexer, packages/memory, packages/router,
+       packages/governor, packages/mcp-server, packages/sub-agents, packages/cli
+  3. Each package name: `@coderelay/<name>`, version `0.0.0`, private, type `module`
+  4. Each package tsconfig.json extends root `../../tsconfig.json`
+  5. Each package has a `build` script: `tsc -p tsconfig.json`
+  6. Each package has a stub `src/index.ts` exporting nothing
+  7. Add `docs/`, `LICENSES/`, `tests/`, `benchmarks/` directories (`.gitkeep`)
+  8. Run `pnpm -r build` → must exit 0
+  9. Commit: "chore: set up monorepo workspaces"
 
-When 0.1 passes, update CURRENT TASK to 0.2 (monorepo workspaces) and STOP.
-Do not start 0.2 in the same session unless I (the user) say so.
+When 0.2 passes, update CURRENT TASK to 0.3 and STOP.
 ```
 
 ---
 
 ## 📅 DONE THIS SESSION
-*(empty — first session)*
+
+- 2026-04-29: Task 0.1 complete — pnpm init, tsconfig (strict/ESNext/NodeNext), .gitignore, .gitattributes, .editorconfig, MIT LICENSE, src/index.ts stub, moved docs to docs/. `pnpm tsc --noEmit` exits 0. Initial commit `f0e0f20`.
 
 ---
 
