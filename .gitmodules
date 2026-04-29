@@ -1,0 +1,12 @@
+[submodule "external/claude-context"]
+	path = external/claude-context
+	url = https://github.com/zilliztech/claude-context
+[submodule "external/graphify"]
+	path = external/graphify
+	url = https://github.com/safishamsi/graphify
+[submodule "external/cao"]
+	path = external/cao
+	url = https://github.com/awslabs/cli-agent-orchestrator
+[submodule "external/context-mode"]
+	path = external/context-mode
+	url = https://github.com/mksglu/context-mode
