@@ -18,9 +18,12 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@coderelay/core": "workspace:*"
+    "@coderelay/core": "workspace:*",
+    "@coderelay/router": "workspace:*",
+    "commander": "^12.1.0"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "typescript": "^5.9.3"
   }
 }

@@ -15,9 +15,19 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@coderelay/core": "workspace:*"
+    "@anthropic-ai/sdk": "^0.92.0",
+    "@coderelay/core": "workspace:*",
+    "@google/generative-ai": "^0.24.1",
+    "better-sqlite3": "^12.9.0",
+    "chokidar": "^5.0.0",
+    "js-yaml": "^4.1.1",
+    "ollama": "^0.6.3",
+    "openai": "^6.35.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.19.39",
     "typescript": "^5.9.3"
   }
 }

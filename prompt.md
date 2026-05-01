@@ -7,14 +7,14 @@
 
 ## 🟢 Phase Pointer
 
-**Currently on:** Phase 0 — Setup & Reuse Audit
-**Next concrete task:** `0.7 Logging (Pino)`
+**Currently on:** Phase 2 — Indexer + Code Graph
+**Next concrete task:** `2.1 Vendor claude-context-core`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
 ### Phase Tick-Off
-- [ ] Phase 0 — Setup & Reuse Audit
-- [ ] Phase 1 — LLM Router
+- [x] Phase 0 — Setup & Reuse Audit
+- [x] Phase 1 — LLM Router
 - [ ] Phase 2 — Indexer + Code Graph
 - [ ] Phase 3 — Memory System
 - [ ] Phase 4 — MCP Server
@@ -74,29 +74,25 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        0.7
-Title:     Logging (Pino)
-From:      work.md → Phase 0 → 0.7
-Acceptance: `import { log } from "@coderelay/core"; log.info("hi")` prints.
+ID:        2.1
+Title:     Vendor claude-context-core into packages/indexer/src/upstream/
+From:      work.md → Phase 2 → 2.1
+Acceptance: Chunker produces same chunks as upstream on a fixture file.
 Sub-steps:
-  1. Add pino + pino-pretty to packages/core devDependencies
-  2. Create packages/core/src/logger.ts — exports `log` (pino instance)
-     - dev: pretty transport (human-readable)
-     - prod: JSON (NODE_ENV=production)
-     - name field = "@coderelay/core"
-  3. Re-export log from packages/core/src/index.ts
-  4. Add a smoke test: packages/core/src/logger.test.ts — log.info("hi") doesn't throw
-  5. Each other package adds pino dep + creates its own logger.ts (name = package name)
-  6. Run pnpm -r typecheck → exits 0
-  7. Commit: "feat: add Pino logging to all packages"
-
-When 0.7 passes, update CURRENT TASK to Phase 1 (task 1.1) and STOP.
+  1. Read external/claude-context/packages/core/src/ — identify splitter/, sync/, embedding/ dirs
+  2. Copy relevant files into packages/indexer/src/upstream/
+  3. Strip Milvus dependency (remove milvus client imports, replace with stub)
+  4. Add attribution header /* Adapted from zilliztech/claude-context@<sha>, MIT */ to each copied file
+  5. Create packages/indexer/UPSTREAM.md documenting what was taken + what changed
+  6. Write fixture test: chunk a 50-line TS file and assert chunk count > 0
+  7. pnpm -r typecheck exits 0
 ```
 
 ---
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-01: Tasks 0.7 + Phase 1 (1.1–1.5) complete — Pino logging, LLMProvider interface, 4 provider adapters (Anthropic/OpenAI/Gemini/Ollama), YAML routing engine with hot-reload, SQLite usage tracking, retry + circuit breaker. `coderelay usage --today` CLI command. 11 tests passing.
 - 2026-04-29: Task 0.1 complete — pnpm init, tsconfig (strict/ESNext/NodeNext), .gitignore, .gitattributes, .editorconfig, MIT LICENSE, src/index.ts stub, moved docs to docs/. `pnpm tsc --noEmit` exits 0. Initial commit `f0e0f20`.
 - 2026-04-29: Task 0.2 complete — pnpm-workspace.yaml, 8 packages (core/indexer/memory/router/governor/mcp-server/sub-agents/cli) each with package.json + tsconfig + stub src/index.ts. LICENSES/, tests/, benchmarks/ dirs. `pnpm -r build` exits 0.
 - 2026-04-29: Task 0.3 complete — 4 submodules pinned: claude-context@3675469, graphify@28b17d3, cao@1f2a048, context-mode@f00a1ab. All READMEs readable.

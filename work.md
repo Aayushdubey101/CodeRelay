@@ -126,16 +126,16 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
 
 > Build from scratch — small, easy, and the foundation for everything else.
 
-* [ ] **1.1** Define `LLMProvider` interface: `complete(messages, opts) -> AsyncIterable<chunk>`, `embed(texts) -> number[][]`, `countTokens(s) -> number`.
-  *Acceptance:* Interface compiles with docstring.
-* [ ] **1.2** Implement adapters: `AnthropicProvider`, `OpenAIProvider`, `GeminiProvider`, `OllamaProvider`. Stream + non-stream.
-  *Acceptance:* Smoke test hits each provider (skipped if no API key).
-* [ ] **1.3** Routing rules engine: tag tasks (`embed | summarize | plan | code-gen | classify | sanitize`) → cheapest model meeting quality bar. YAML config with hot-reload.
-  *Acceptance:* Unit test: a `summarize` task on 5k tokens routes to Ollama, not Claude.
-* [ ] **1.4** Token & cost accounting: persist per-call to SQLite `usage` table.
-  *Acceptance:* `coderelay usage --today` prints a table.
-* [ ] **1.5** Retry + circuit breaker (exponential backoff, 3 attempts, fail-open to next provider).
-  *Acceptance:* Test simulates 429, retries succeed.
+* [x] **1.1** Define `LLMProvider` interface: `complete(messages, opts) -> AsyncIterable<chunk>`, `embed(texts) -> number[][]`, `countTokens(s) -> number`.
+  *Acceptance:* Interface compiles with docstring. (2026-05-01)
+* [x] **1.2** Implement adapters: `AnthropicProvider`, `OpenAIProvider`, `GeminiProvider`, `OllamaProvider`. Stream + non-stream.
+  *Acceptance:* Smoke test hits each provider (skipped if no API key). (2026-05-01)
+* [x] **1.3** Routing rules engine: tag tasks (`embed | summarize | plan | code-gen | classify | sanitize`) → cheapest model meeting quality bar. YAML config with hot-reload.
+  *Acceptance:* Unit test: a `summarize` task on 5k tokens routes to Ollama, not Claude. (2026-05-01)
+* [x] **1.4** Token & cost accounting: persist per-call to SQLite `usage` table.
+  *Acceptance:* `coderelay usage --today` prints a table. (2026-05-01)
+* [x] **1.5** Retry + circuit breaker (exponential backoff, 3 attempts, fail-open to next provider).
+  *Acceptance:* Test simulates 429, retries succeed. (2026-05-01)
 
 ### PHASE 2 — Indexer + Code Graph (Days 6–10)
 
