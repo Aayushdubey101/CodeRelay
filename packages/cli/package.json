@@ -7,9 +7,18 @@
   "bin": {
     "coderelay": "./dist/index.js"
   },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@coderelay/core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

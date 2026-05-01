@@ -119,8 +119,8 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
   *Acceptance:* Both files present and accurate. (2026-04-29)
 * [x] **0.6** CI: GitHub Actions running `lint + typecheck + test` on push.
   *Acceptance:* Green check on a no-op commit. (2026-04-29)
-* [ ] **0.7** Logging: Pino, pretty in dev, JSON in prod. One logger per package.
-  *Acceptance:* `import { log } from "@coderelay/core"; log.info("hi")` prints.
+* [x] **0.7** Logging: Pino, pretty in dev, JSON in prod. One logger per package.
+  *Acceptance:* `import { log } from "@coderelay/core"; log.info("hi")` prints. (2026-05-01)
 
 ### PHASE 1 — LLM Router (Days 3–5)
 
