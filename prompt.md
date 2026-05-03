@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 4 — MCP Server
-**Next concrete task:** `4.3 Resources + 4.4 Prompt templates`
+**Next concrete task:** `5.1 Study CAO providers`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -17,7 +17,7 @@
 - [x] Phase 1 — LLM Router
 - [x] Phase 2 — Indexer + Code Graph
 - [x] Phase 3 — Memory System
-- [ ] Phase 4 — MCP Server
+- [x] Phase 4 — MCP Server
 - [ ] Phase 5 — Sub-Agent Wrapping
 - [ ] Phase 6 — Governance Layer
 - [ ] Phase 7 — Orchestrator Loop
@@ -74,26 +74,25 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        4.3 + 4.4
-Title:     MCP resources + prompt templates
-From:      work.md → Phase 4 → 4.3, 4.4
-Acceptance: Inspector lists & fetches resources; prompt templates render with args.
+ID:        5.1
+Title:     Study CAO providers + document patterns in reuse-map.md
+From:      work.md → Phase 5 → 5.1
+Acceptance: Notes cover at least claude_code, gemini_cli, codex providers.
 Sub-steps:
-  1. Add 3 resources to server.ts (packages/mcp-server/src/server.ts):
-       repo://structure   → files table summary (counts by lang)
-       repo://project-md  → contents of PROJECT.md
-       repo://recent-changes → last 20 indexed files by mtime
-  2. Add 3 prompt templates:
-       /explain-symbol(qualified_name) → "Explain symbol X…"
-       /refactor-aware(file, description) → refactor prompt with file context
-       /find-bug(file, symptom) → debugging prompt with file chunks
-  3. pnpm tsc --noEmit exits 0
+  1. Read external/cao/cli_agent_orchestrator/providers/ source files
+  2. Add a "Phase 5 — CAO Study" section to docs/reuse-map.md covering:
+       - How CAO spawns Claude Code (subprocess, env vars, flags)
+       - How CAO spawns Gemini CLI
+       - Tool restriction patterns used by CAO
+       - What to port vs skip for our TS implementation
+  3. No code changes — docs only
 ```
 
 ---
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-04: Task 4.3+4.4 complete — 3 MCP resources (repo://structure, repo://project-md, repo://recent-changes) + 3 prompt templates (explain-symbol, refactor-aware, find-bug). Phase 4 complete.
 - 2026-05-04: Task 4.1+4.2 complete — MCP server in packages/mcp-server/src/server.ts. McpServer (SDK 1.29) + StdioServerTransport. 10 tools: get_relevant_context, get_symbol, get_callers, get_callees, get_file_summary, search_semantic, find_similar_code, get_dependency_tree, recall_fact, record_decision. Server starts on stdio. 101/101 tests green.
 - 2026-05-04: Task 3.5 complete — ContextPager in packages/memory/src/pager.ts. LRU hot/cold split, SQLite cold storage, retrieve promotes to hot. 50k tokens runs in 8k window. 9 unit tests.
 - 2026-05-04: Task 3.4 complete — ContextManifest in packages/memory/src/manifest.ts. SQLite manifests table, UNIQUE(task_id,file,symbol,chunk_id) dedup on upsert. 9 unit tests. 101/101 green. Phase 3 complete.

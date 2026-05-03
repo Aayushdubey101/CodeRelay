@@ -13,7 +13,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import { openGraphDb } from '@coderelay/indexer';
 import { LongTermMemory } from '@coderelay/memory';
-import { appendFileSync, writeFileSync, existsSync } from 'node:fs';
+import { appendFileSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 export interface CodeRelayServerOptions {
@@ -336,6 +336,158 @@ function buildServer(opts: CodeRelayServerOptions): McpServer {
       } catch { /* ignore fs errors */ }
 
       return { content: [{ type: 'text' as const, text: JSON.stringify({ id, text, tags }) }] };
+    },
+  );
+
+  // ── Resources ─────────────────────────────────────────────────────────────
+
+  mcp.registerResource(
+    'repo-structure',
+    'repo://structure',
+    { description: 'Code graph statistics: file counts by language, plus total symbol/edge/chunk counts.' },
+    async (_uri) => {
+      const byLang = db()
+        .prepare<[], { lang: string; n: number }>(
+          `SELECT lang, COUNT(*) AS n FROM files GROUP BY lang ORDER BY n DESC`,
+        )
+        .all() as Array<{ lang: string; n: number }>;
+      const total = {
+        files: byLang.reduce((s, r) => s + r.n, 0),
+        symbols: (db().prepare<[], { n: number }>('SELECT COUNT(*) AS n FROM symbols').get() as { n: number }).n,
+        edges: (db().prepare<[], { n: number }>('SELECT COUNT(*) AS n FROM edges').get() as { n: number }).n,
+        chunks: (db().prepare<[], { n: number }>('SELECT COUNT(*) AS n FROM chunks').get() as { n: number }).n,
+      };
+      return { contents: [{ uri: 'repo://structure', mimeType: 'application/json', text: JSON.stringify({ by_language: byLang, totals: total }) }] };
+    },
+  );
+
+  mcp.registerResource(
+    'repo-project-md',
+    'repo://project-md',
+    { description: 'Contents of PROJECT.md — architectural decisions and conventions.' },
+    async (_uri) => {
+      const projectMd = opts.projectMdPath ?? join(process.cwd(), 'PROJECT.md');
+      const text = existsSync(projectMd) ? readFileSync(projectMd, 'utf8') : '(PROJECT.md not found)';
+      return { contents: [{ uri: 'repo://project-md', mimeType: 'text/markdown', text }] };
+    },
+  );
+
+  mcp.registerResource(
+    'repo-recent-changes',
+    'repo://recent-changes',
+    { description: 'Last 20 files indexed by modification time.' },
+    async (_uri) => {
+      const rows = db()
+        .prepare<[], { path: string; lang: string; indexed_at: number }>(
+          `SELECT path, lang, indexed_at FROM files ORDER BY indexed_at DESC LIMIT 20`,
+        )
+        .all() as Array<{ path: string; lang: string; indexed_at: number }>;
+      return { contents: [{ uri: 'repo://recent-changes', mimeType: 'application/json', text: JSON.stringify({ recent_files: rows }) }] };
+    },
+  );
+
+  // ── Prompt templates ──────────────────────────────────────────────────────
+
+  mcp.registerPrompt(
+    'explain-symbol',
+    {
+      description: 'Generate a prompt asking Claude to explain a given symbol.',
+      argsSchema: { qualified_name: z.string().describe('Fully qualified symbol name to explain') },
+    },
+    async ({ qualified_name }) => {
+      const sym = db()
+        .prepare<[string], SymbolRow>('SELECT * FROM symbols WHERE qualified_name = ?')
+        .get(qualified_name) as SymbolRow | undefined;
+
+      const context = sym
+        ? `Kind: ${sym.kind}\nSignature: ${sym.signature ?? '(none)'}\nFile: ${getFilePath(db(), sym.file_id)}`
+        : '(symbol not found in index)';
+
+      return {
+        description: `Explain ${qualified_name}`,
+        messages: [
+          {
+            role: 'user' as const,
+            content: { type: 'text' as const, text: `Please explain the following symbol from the codebase:\n\nSymbol: ${qualified_name}\n${context}\n\nProvide: purpose, parameters, return value, and any important side effects.` },
+          },
+        ],
+      };
+    },
+  );
+
+  mcp.registerPrompt(
+    'refactor-aware',
+    {
+      description: 'Generate a refactor prompt that includes file context from the graph.',
+      argsSchema: {
+        file: z.string().describe('File path to refactor'),
+        description: z.string().describe('What to change'),
+      },
+    },
+    async ({ file, description }) => {
+      const symbols = db()
+        .prepare<[string], { name: string; kind: string; qualified_name: string }>(
+          `SELECT s.name, s.kind, s.qualified_name
+           FROM symbols s
+           JOIN files f ON s.file_id = f.id
+           WHERE f.path = ?
+           ORDER BY s.start ASC LIMIT 20`,
+        )
+        .all(file) as Array<{ name: string; kind: string; qualified_name: string }>;
+
+      const symList = symbols.map((s) => `  - ${s.kind} ${s.qualified_name}`).join('\n') || '  (none indexed)';
+
+      return {
+        description: `Refactor ${file}`,
+        messages: [
+          {
+            role: 'user' as const,
+            content: {
+              type: 'text' as const,
+              text: `Refactor the file \`${file}\`.\n\nChange requested: ${description}\n\nKnown symbols in this file:\n${symList}\n\nEnsure all callers of changed symbols are updated. Run type-check after changes.`,
+            },
+          },
+        ],
+      };
+    },
+  );
+
+  mcp.registerPrompt(
+    'find-bug',
+    {
+      description: 'Generate a debugging prompt with relevant code chunks for a symptom.',
+      argsSchema: {
+        file: z.string().describe('File to debug'),
+        symptom: z.string().describe('Bug symptom or error message'),
+      },
+    },
+    async ({ file, symptom }) => {
+      const chunks = db()
+        .prepare<[string, string], { content: string }>(
+          `SELECT c.content
+           FROM chunks c
+           JOIN files f ON c.file_id = f.id
+           WHERE f.path = ? AND c.content LIKE ?
+           LIMIT 5`,
+        )
+        .all(file, `%${symptom.slice(0, 30)}%`) as Array<{ content: string }>;
+
+      const codeContext = chunks.length > 0
+        ? chunks.map((c, i) => `--- chunk ${i + 1} ---\n${c.content.slice(0, 400)}`).join('\n\n')
+        : '(no matching chunks found; search the file manually)';
+
+      return {
+        description: `Debug ${file}: ${symptom}`,
+        messages: [
+          {
+            role: 'user' as const,
+            content: {
+              type: 'text' as const,
+              text: `Debug the following issue in \`${file}\`:\n\nSymptom: ${symptom}\n\nRelevant code:\n${codeContext}\n\nIdentify the root cause and provide a targeted fix.`,
+            },
+          },
+        ],
+      };
     },
   );
 

@@ -202,10 +202,10 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
   - `recall_fact(query)` — long-term memory
   - `record_decision(text)` — write to PROJECT.md
   *Acceptance:* All tools callable from MCP Inspector, return well-formed JSON. (2026-05-04)
-* [ ] **4.3** Expose resources: `repo://structure`, `repo://project-md`, `repo://recent-changes`.
-  *Acceptance:* Inspector lists & fetches each.
-* [ ] **4.4** Expose prompt templates: `/explain-symbol`, `/refactor-aware`, `/find-bug`.
-  *Acceptance:* Each renders with substituted args.
+* [x] **4.3** Expose resources: `repo://structure`, `repo://project-md`, `repo://recent-changes`.
+  *Acceptance:* Inspector lists & fetches each. (2026-05-04)
+* [x] **4.4** Expose prompt templates: `/explain-symbol`, `/refactor-aware`, `/find-bug`.
+  *Acceptance:* Each renders with substituted args. (2026-05-04)
 
 ### PHASE 5 — Sub-Agent Wrapping (Days 17–19)
 
