@@ -17,3 +17,12 @@ export type { WorktreeInfo, WorktreeOptions } from "./worktree.js";
 
 export { ActionLog, defaultLogPath } from "./actionlog.js";
 export type { ActionEntry, ActionKind } from "./actionlog.js";
+
+export { sanitize, hasInjection } from "./sanitizer.js";
+export type { SanitizeResult, InjectionMatch, InjectionSeverity } from "./sanitizer.js";
+
+export { scanSecrets, hasSecrets } from "./secrets.js";
+export type { ScanResult, SecretMatch } from "./secrets.js";
+
+export { EgressFilter, hostnameFromUrl } from "./egress.js";
+export type { EgressConfig, EgressResult } from "./egress.js";
