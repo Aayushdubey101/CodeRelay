@@ -11,3 +11,9 @@ export type { PolicyConfig, PolicyResult } from "./policy.js";
 
 export { Governor } from "./governor.js";
 export type { GovernorResult } from "./governor.js";
+
+export { createWorktree, removeWorktree, mergeWorktree, rollbackWorktree } from "./worktree.js";
+export type { WorktreeInfo, WorktreeOptions } from "./worktree.js";
+
+export { ActionLog, defaultLogPath } from "./actionlog.js";
+export type { ActionEntry, ActionKind } from "./actionlog.js";

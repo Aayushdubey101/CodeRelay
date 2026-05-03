@@ -231,10 +231,10 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
 * [x] **6.2** **Hard-coded destructive blocklist** (always-on, not user-configurable):
   `rm -rf`, `DROP TABLE`, `DROP DATABASE`, `git push --force`, `chmod 777 -R`, `:(){ :|:& };:`, `mkfs`, `dd if=`, etc.
   *Acceptance:* Each pattern blocked at policy layer with clear error. (2026-05-04)
-* [ ] **6.3** **Git worktree sandbox**: every task runs in fresh worktree branch `coderelay/task-<id>`. Merge to main only on explicit approval.
-  *Acceptance:* Failed task leaves main untouched.
-* [ ] **6.4** **Action log**: append-only JSONL of every sub-agent action; `coderelay rollback <task-id>` resets to pre-task.
-  *Acceptance:* Run task, inspect log, rollback, verify clean tree.
+* [x] **6.3** **Git worktree sandbox**: every task runs in fresh worktree branch `coderelay/task-<id>`. Merge to main only on explicit approval.
+  *Acceptance:* Failed task leaves main untouched. (2026-05-03)
+* [x] **6.4** **Action log**: append-only JSONL of every sub-agent action; `coderelay rollback <task-id>` resets to pre-task.
+  *Acceptance:* Run task, inspect log, rollback, verify clean tree. (2026-05-03)
 * [ ] **6.5** **Prompt-injection sanitizer**: strip/flag suspicious instructions in any external text fed into LLM. Heuristics: "ignore previous", "system:", embedded tool calls.
   *Acceptance:* Test with known injection patterns → all flagged.
 * [ ] **6.6** **Secret scanner**: gitleaks rules on any file content before LLM. Mask matched secrets.

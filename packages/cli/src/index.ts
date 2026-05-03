@@ -6,6 +6,8 @@ import { UsageTracker } from "@coderelay/router";
 import { openGraphDb, IndexPipeline } from "@coderelay/indexer";
 import { LongTermMemory } from "@coderelay/memory";
 import { runAgent, type AgentName } from "@coderelay/sub-agents";
+import { ActionLog, defaultLogPath, rollbackWorktree } from "@coderelay/governor";
+import { execa } from "execa";
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join, extname, resolve } from "node:path";
 
@@ -320,6 +322,79 @@ program
       console.log(`[${i + 1}] (${date}${tags}) ${f.text}`);
     }
     console.log();
+  });
+
+// --- log ---
+program
+  .command("log")
+  .description("Show action log entries for all tasks or a specific task")
+  .option("--task <taskId>", "Filter by task ID")
+  .option("--log-path <path>", "Path to action.log (default: .coderelay/action.log)")
+  .action((opts: { task?: string; logPath?: string }) => {
+    const logPath = opts.logPath ?? defaultLogPath(process.cwd());
+    const al = new ActionLog(logPath);
+    const entries = opts.task ? al.forTask(opts.task) : al.readAll();
+
+    if (entries.length === 0) {
+      console.log("No action log entries found.");
+      return;
+    }
+
+    console.log(`\nAction Log — ${entries.length} entr${entries.length === 1 ? 'y' : 'ies'}\n`);
+    for (const e of entries) {
+      const date = new Date(e.ts).toISOString().slice(0, 19).replace('T', ' ');
+      const taskShort = e.taskId.slice(0, 8);
+      const payloadStr = JSON.stringify(e.payload);
+      const preview = payloadStr.length > 60 ? payloadStr.slice(0, 60) + '…' : payloadStr;
+      console.log(`  ${date}  [${taskShort}]  ${e.kind.padEnd(16)}  ${preview}`);
+    }
+    console.log();
+  });
+
+// --- rollback ---
+program
+  .command("rollback <taskId>")
+  .description("Rollback a task: remove its worktree branch (if pending) or revert its merge commit")
+  .option("--log-path <path>", "Path to action.log (default: .coderelay/action.log)")
+  .action(async (taskId: string, opts: { logPath?: string }) => {
+    const repoRoot = process.cwd();
+    const logPath = opts.logPath ?? defaultLogPath(repoRoot);
+    const al = new ActionLog(logPath);
+    const entries = al.forTask(taskId);
+
+    if (entries.length === 0) {
+      console.error(`No log entries found for task ${taskId}.`);
+      process.exit(1);
+    }
+
+    const createEntry = entries.find((e) => e.kind === 'worktree_create');
+    const mergeEntry  = entries.find((e) => e.kind === 'worktree_merge');
+
+    if (!createEntry) {
+      console.error(`Task ${taskId} has no worktree_create entry — cannot rollback.`);
+      process.exit(1);
+    }
+
+    if (mergeEntry) {
+      // Already merged — revert the merge commit
+      const mergeCommit = mergeEntry.payload['mergeCommit'] as string | undefined;
+      if (!mergeCommit) {
+        console.error(`No merge commit recorded for task ${taskId}.`);
+        process.exit(1);
+      }
+      console.log(`Reverting merge commit ${mergeCommit.slice(0, 8)}…`);
+      await execa('git', ['revert', '--no-edit', '-m', '1', mergeCommit], { cwd: repoRoot });
+      console.log(`Rollback complete (reverted merge).`);
+    } else {
+      // Not yet merged — just remove the worktree branch
+      const wt = createEntry.payload as { taskId: string; branch: string; path: string; baseRef: string };
+      console.log(`Removing worktree branch ${wt.branch}…`);
+      await rollbackWorktree(wt, { repoRoot });
+      console.log(`Rollback complete (worktree removed).`);
+    }
+
+    // Append rollback entry
+    al.append({ taskId, kind: 'worktree_rollback', payload: { rolledBack: true } });
   });
 
 program.parse(process.argv);

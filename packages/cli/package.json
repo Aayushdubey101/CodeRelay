@@ -19,11 +19,13 @@
   },
   "dependencies": {
     "@coderelay/core": "workspace:*",
+    "@coderelay/governor": "workspace:*",
     "@coderelay/indexer": "workspace:*",
     "@coderelay/memory": "workspace:*",
     "@coderelay/router": "workspace:*",
     "@coderelay/sub-agents": "workspace:*",
-    "commander": "^12.1.0"
+    "commander": "^12.1.0",
+    "execa": "^9.6.1"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
