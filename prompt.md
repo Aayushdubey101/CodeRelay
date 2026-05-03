@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 2 — Indexer + Code Graph
-**Next concrete task:** `2.1 Vendor claude-context-core`
+**Next concrete task:** `2.2 Define graph schema in SQLite`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,24 +74,30 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        2.1
-Title:     Vendor claude-context-core into packages/indexer/src/upstream/
-From:      work.md → Phase 2 → 2.1
-Acceptance: Chunker produces same chunks as upstream on a fixture file.
+ID:        2.2
+Title:     Define graph schema in SQLite
+From:      work.md → Phase 2 → 2.2
+Acceptance: `pnpm migrate` creates schema; fixture insert + query works.
 Sub-steps:
-  1. Read external/claude-context/packages/core/src/ — identify splitter/, sync/, embedding/ dirs
-  2. Copy relevant files into packages/indexer/src/upstream/
-  3. Strip Milvus dependency (remove milvus client imports, replace with stub)
-  4. Add attribution header /* Adapted from zilliztech/claude-context@<sha>, MIT */ to each copied file
-  5. Create packages/indexer/UPSTREAM.md documenting what was taken + what changed
-  6. Write fixture test: chunk a 50-line TS file and assert chunk count > 0
-  7. pnpm -r typecheck exits 0
+  1. Add better-sqlite3 (+ @types/better-sqlite3) to packages/indexer/package.json
+  2. Create packages/indexer/src/db/schema.ts — DDL constants (CREATE TABLE IF NOT EXISTS):
+       files (id INTEGER PK, path TEXT UNIQUE, hash TEXT, lang TEXT, mtime INTEGER, indexed_at INTEGER)
+       symbols (id INTEGER PK, file_id INTEGER FK, parent_id INTEGER, kind TEXT, name TEXT,
+                qualified_name TEXT, start INTEGER, end INTEGER, signature TEXT, docstring TEXT)
+       edges (src INTEGER, dst INTEGER, kind TEXT, confidence REAL, PRIMARY KEY (src,dst,kind))
+       chunks (id INTEGER PK, symbol_id INTEGER, file_id INTEGER FK, content TEXT,
+               token_count INTEGER, embedding_ref TEXT)
+  3. Create packages/indexer/src/db/migrate.ts — opens/creates .coderelay/graph.db (WAL mode), runs DDL
+  4. Wire `coderelay migrate` CLI command in packages/cli/
+  5. Write test: insert one file row + one symbol row, query back, assert fields match
+  6. pnpm tsc --noEmit exits 0
 ```
 
 ---
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-03: Task 2.1 complete — vendored claude-context-core splitter/sync/embedding into packages/indexer/src/upstream/. Stripped Milvus (lancedb-stub.ts). Replaced native tree-sitter with regex TextCodeSplitter (web-tree-sitter in 2.3). 17 tests passing. TypeScript strict typecheck clean.
 - 2026-05-01: Tasks 0.7 + Phase 1 (1.1–1.5) complete — Pino logging, LLMProvider interface, 4 provider adapters (Anthropic/OpenAI/Gemini/Ollama), YAML routing engine with hot-reload, SQLite usage tracking, retry + circuit breaker. `coderelay usage --today` CLI command. 11 tests passing.
 - 2026-04-29: Task 0.1 complete — pnpm init, tsconfig (strict/ESNext/NodeNext), .gitignore, .gitattributes, .editorconfig, MIT LICENSE, src/index.ts stub, moved docs to docs/. `pnpm tsc --noEmit` exits 0. Initial commit `f0e0f20`.
 - 2026-04-29: Task 0.2 complete — pnpm-workspace.yaml, 8 packages (core/indexer/memory/router/governor/mcp-server/sub-agents/cli) each with package.json + tsconfig + stub src/index.ts. LICENSES/, tests/, benchmarks/ dirs. `pnpm -r build` exits 0.

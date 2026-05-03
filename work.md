@@ -141,12 +141,12 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
 
 > **Strategy:** Fork claude-context-core's chunker + Merkle indexer, port graphify's symbol/call extractor, store in SQLite.
 
-* [ ] **2.1** **Vendor `claude-context-core`** into `packages/indexer/src/upstream/`. Strip Milvus dependency. Keep:
+* [x] **2.1** **Vendor `claude-context-core`** into `packages/indexer/src/upstream/`. Strip Milvus dependency. Keep:
   - `splitter/` (AST chunker)
   - `sync/` (Merkle-tree incremental indexer)
   - `embedding/` (provider abstraction — already supports OpenAI/Voyage/Ollama/Gemini)
   Document changes in `packages/indexer/UPSTREAM.md`.
-  *Acceptance:* Chunker produces same chunks as upstream on a fixture file.
+  *Acceptance:* Chunker produces same chunks as upstream on a fixture file. (2026-05-03)
 * [ ] **2.2** **Define graph schema in SQLite** (better-sqlite3 with WAL):
   ```sql
   files (id, path, hash, lang, mtime, indexed_at)

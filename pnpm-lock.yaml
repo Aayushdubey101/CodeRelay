@@ -65,7 +65,16 @@ importers:
       '@coderelay/core':
         specifier: workspace:*
         version: link:../core
+      ollama:
+        specifier: ^0.6.3
+        version: 0.6.3
+      openai:
+        specifier: ^6.35.0
+        version: 6.35.0
     devDependencies:
+      '@types/node':
+        specifier: ^20.19.39
+        version: 20.19.39
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

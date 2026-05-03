@@ -15,9 +15,12 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@coderelay/core": "workspace:*"
+    "@coderelay/core": "workspace:*",
+    "ollama": "^0.6.3",
+    "openai": "^6.35.0"
   },
   "devDependencies": {
+    "@types/node": "^20.19.39",
     "typescript": "^5.9.3"
   }
 }
