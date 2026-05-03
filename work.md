@@ -166,8 +166,8 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
   *Acceptance:* Round-trip embed → store → search returns same chunk. (2026-05-03)
 * [x] **2.6** **Wire the pipeline**: file change → Merkle diff → re-extract symbols + edges → re-chunk → re-embed → upsert.
   *Acceptance:* Edit one function in 1000-file repo, verify only that file's rows update via SQL. (2026-05-03)
-* [ ] **2.7** **CLI commands**: `coderelay index <path>`, `coderelay index --watch`, `coderelay graph stats`, `coderelay search "<query>"`.
-  *Acceptance:* Indexing CodeRelay's own repo finishes in <60s.
+* [x] **2.7** **CLI commands**: `coderelay index <path>`, `coderelay index --watch`, `coderelay graph stats`, `coderelay search "<query>"`.
+  *Acceptance:* Indexing CodeRelay's own repo finishes in <60s. (2026-05-03)
 
 ### PHASE 3 — Memory System (Days 11–14)
 

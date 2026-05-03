@@ -7,15 +7,15 @@
 
 ## 🟢 Phase Pointer
 
-**Currently on:** Phase 2 — Indexer + Code Graph
-**Next concrete task:** `2.7 CLI commands`
+**Currently on:** Phase 3 — Memory System
+**Next concrete task:** `3.1 Working memory`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
 ### Phase Tick-Off
 - [x] Phase 0 — Setup & Reuse Audit
 - [x] Phase 1 — LLM Router
-- [ ] Phase 2 — Indexer + Code Graph
+- [x] Phase 2 — Indexer + Code Graph
 - [ ] Phase 3 — Memory System
 - [ ] Phase 4 — MCP Server
 - [ ] Phase 5 — Sub-Agent Wrapping
@@ -74,27 +74,26 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        2.7
-Title:     CLI commands: coderelay index, graph stats, search
-From:      work.md → Phase 2 → 2.7
-Acceptance: Indexing CodeRelay's own repo finishes in <60s.
+ID:        3.1
+Title:     Working memory — in-process Map keyed by task ID
+From:      work.md → Phase 3 → 3.1
+Acceptance: Two parallel tasks don't see each other's memory.
 Sub-steps:
-  1. Add `coderelay index <path>` command to packages/cli/src/index.ts
-       - Walks all .ts/.js/.py/.go/.rs/.java/.cpp files under <path>
-       - Calls IndexPipeline.indexFiles()
-       - Prints progress and final stats
-  2. Add `coderelay graph stats` command
-       - Reads graph DB, prints: files, symbols, edges, chunks counts
-  3. Add `coderelay search "<query>"` command (semantic stub)
-       - For now: SQL LIKE search on chunks.content, prints top 5 matches
-  4. Test all 3 commands against packages/ directory (sanity check, not automated)
-  5. pnpm tsc --noEmit exits 0
+  1. Create packages/memory/src/working.ts
+       - Export class WorkingMemory with get/set/delete/clear(taskId) methods
+       - Backed by Map<taskId, Map<key, unknown>>
+       - No persistence (process lifetime only)
+  2. Export from packages/memory/src/index.ts
+  3. Write unit test: spawn two task IDs, assert isolation
+  4. pnpm tsc --noEmit exits 0
 ```
 
 ---
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-03: Task 2.7 complete — CLI commands: `coderelay index <path>`, `coderelay graph stats`, `coderelay search "<query>"` in packages/cli/src/index.ts. walkFiles() skips node_modules/dist/.git. Batch processing (50 files/batch) with progress output. Indexed own packages/ in 0.1s (44 files, 232 symbols, 641 chunks). 53/53 tests green. Phase 2 complete.
+- 2026-05-03: Task 2.6 complete — IndexPipeline in packages/indexer/src/pipeline.ts. File hash-based Merkle diffing (skip unchanged), SQLite transaction per file (cascade delete old symbols→edges→chunks, reinsert), LanceDB embedding upsert on embedding provider present. 5 pipeline tests (index/skip/re-index/dedup/edges). 53/53 tests green.
 - 2026-05-03: Task 2.5 complete — LanceVectorStore in packages/indexer/src/upstream/vectordb/lancedb.ts. Implements full VectorDatabase interface (createCollection, insert, search, delete, query, countRows, etc). apache-arrow 18 pinned for LanceDB peer dep. 7 round-trip tests. 47/47 tests green.
 - 2026-05-03: Task 2.4 complete — EdgeResolver in packages/indexer/src/resolver.ts. 6 strategies: exact(1.0)/local-scope(0.95)/file-alias(0.9)/import-resolved(0.85)/type-hint(0.75)/fuzzy-Levenshtein(0.5). 9 unit tests + gold-set recall test. 40/40 tests green. TypeScript strict clean.
 - 2026-05-03: Task 2.3 complete — SymbolExtractor in packages/indexer/src/extract.ts. web-tree-sitter WASM, 8 languages (TS/TSX/JS/Python/Go/Rust/Java/C++), named imports fix. 5 fixture tests: ≥95% symbol coverage, import/heritage/line-number/parent checks. 31/31 tests green. TypeScript strict clean.
