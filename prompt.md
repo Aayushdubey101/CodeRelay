@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 3 — Memory System
-**Next concrete task:** `3.2 Session memory`
+**Next concrete task:** `3.3 Long-term memory`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,31 +74,33 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        3.2
-Title:     Session memory — SQLite sessions + session_turns + auto-summarize
-From:      work.md → Phase 3 → 3.2
-Acceptance: After 25 turns, summary row appears, oldest turns archived.
+ID:        3.3
+Title:     Long-term memory — facts table + PROJECT.md auto-update
+From:      work.md → Phase 3 → 3.3
+Acceptance: Restart CLI: `coderelay recall "auth flow"` returns prior facts.
 Sub-steps:
-  1. Create packages/memory/src/session.ts
-       - SQLite tables: sessions (id, created_at, updated_at, summary)
-                        session_turns (id, session_id, role, content, ts)
-       - Export class SessionMemory with:
-           openSession(id?) → sessionId
-           addTurn(sessionId, role, content)
-           getTurns(sessionId, limit?) → turn[]
-           getSession(sessionId) → session row
+  1. Create packages/memory/src/longterm.ts
+       - SQLite table: facts (id, text, embedding BLOB nullable, ts, tags TEXT)
+       - Export class LongTermMemory with:
+           recordFact(text, tags?) → id
+           searchText(query, limit?) → fact[] (SQL LIKE fallback, vector if embedding given)
+           deleteFact(id)
            close()
-  2. Auto-summarize: after every 20 turns, call router's 'summarize' tag,
-     write result to sessions.summary, archive turns older than last 5
-  3. Export from packages/memory/src/index.ts
-  4. Write unit tests: addTurn, getTurns, auto-summarize triggers at turn 21
-  5. pnpm tsc --noEmit exits 0
+       - Optional Embedding injected for vector search (same interface as indexer)
+  2. Add `coderelay recall "<query>"` CLI command (packages/cli/src/index.ts)
+       - Opens LongTermMemory, calls searchText, prints results
+  3. Add `coderelay remember "<text>"` CLI command
+       - Calls recordFact, prints saved ID
+  4. Export from packages/memory/src/index.ts
+  5. Unit tests: recordFact, searchText LIKE, searchText with mock embedding
+  6. pnpm tsc --noEmit exits 0
 ```
 
 ---
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-03: Task 3.2 complete — SessionMemory in packages/memory/src/session.ts. SQLite sessions+session_turns, WAL, FK cascade. Auto-summarize every N turns (injected Summarizer fn), keeps last K turns active. 11 unit tests including 25-turn acceptance scenario. 74/74 tests green.
 - 2026-05-03: Task 3.1 complete — WorkingMemory in packages/memory/src/working.ts. Map<taskId, Map<key, unknown>>, full isolation between tasks. get/set/delete/clear/keys/has API. 10 unit tests. 63/63 tests green.
 - 2026-05-03: Task 2.7 complete — CLI commands: `coderelay index <path>`, `coderelay graph stats`, `coderelay search "<query>"` in packages/cli/src/index.ts. walkFiles() skips node_modules/dist/.git. Batch processing (50 files/batch) with progress output. Indexed own packages/ in 0.1s (44 files, 232 symbols, 641 chunks). 53/53 tests green. Phase 2 complete.
 - 2026-05-03: Task 2.6 complete — IndexPipeline in packages/indexer/src/pipeline.ts. File hash-based Merkle diffing (skip unchanged), SQLite transaction per file (cascade delete old symbols→edges→chunks, reinsert), LanceDB embedding upsert on embedding provider present. 5 pipeline tests (index/skip/re-index/dedup/edges). 53/53 tests green.

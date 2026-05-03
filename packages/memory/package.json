@@ -15,9 +15,11 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@coderelay/core": "workspace:*"
+    "@coderelay/core": "workspace:*",
+    "better-sqlite3": "^12.9.0"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "typescript": "^5.9.3"
   }
 }

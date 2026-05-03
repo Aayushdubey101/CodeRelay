@@ -175,8 +175,8 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
 
 * [x] **3.1** **Working memory**: in-process `Map<string, any>` keyed by task ID. Lives only for current task.
   *Acceptance:* Two parallel tasks don't see each other's memory. (2026-05-03)
-* [ ] **3.2** **Session memory**: SQLite `sessions` + `session_turns` tables. Auto-summarize every 20 turns via router's `summarize` tag.
-  *Acceptance:* After 25 turns, summary row appears, oldest turns archived.
+* [x] **3.2** **Session memory**: SQLite `sessions` + `session_turns` tables. Auto-summarize every 20 turns via router's `summarize` tag.
+  *Acceptance:* After 25 turns, summary row appears, oldest turns archived. (2026-05-03)
 * [ ] **3.3** **Long-term memory**: `facts` table (text + embedding) + auto-maintained `PROJECT.md` (architecture decisions, conventions, glossary). Updated by LLM at session end.
   *Acceptance:* Restart CLI: `coderelay recall "auth flow"` returns prior facts.
 * [ ] **3.4** **Context manifest**: every prompt assembly logs `{file, symbol, chunk_id, tokens, reason}` per task. Prevents re-loading.
