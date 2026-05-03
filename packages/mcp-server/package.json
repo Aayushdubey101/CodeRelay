@@ -15,7 +15,12 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@coderelay/core": "workspace:*"
+    "@coderelay/core": "workspace:*",
+    "@coderelay/indexer": "workspace:*",
+    "@coderelay/memory": "workspace:*",
+    "@coderelay/router": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.2"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

@@ -188,9 +188,9 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
 
 > **Strategy:** Fork claude-context-mcp boilerplate, replace its 4 tools with our richer set.
 
-* [ ] **4.1** **Vendor `claude-context-mcp`** into `packages/mcp-server/`. Keep stdio transport, server scaffolding. Strip Milvus-specific tools.
-  *Acceptance:* `npx @modelcontextprotocol/inspector packages/mcp-server` connects.
-* [ ] **4.2** Expose CodeRelay tools (Zod-validated, descriptive — descriptions matter for sub-agent accuracy):
+* [x] **4.1** **Vendor `claude-context-mcp`** into `packages/mcp-server/`. Keep stdio transport, server scaffolding. Strip Milvus-specific tools.
+  *Acceptance:* `npx @modelcontextprotocol/inspector packages/mcp-server` connects. (2026-05-04)
+* [x] **4.2** Expose CodeRelay tools (Zod-validated, descriptive — descriptions matter for sub-agent accuracy):
   - `get_relevant_context(query, max_tokens)` — hybrid vector + graph
   - `get_symbol(qualified_name)` — definition + signature
   - `get_callers(qualified_name)` — graph traversal
@@ -201,7 +201,7 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
   - `get_dependency_tree(path)`
   - `recall_fact(query)` — long-term memory
   - `record_decision(text)` — write to PROJECT.md
-  *Acceptance:* All tools callable from MCP Inspector, return well-formed JSON.
+  *Acceptance:* All tools callable from MCP Inspector, return well-formed JSON. (2026-05-04)
 * [ ] **4.3** Expose resources: `repo://structure`, `repo://project-md`, `repo://recent-changes`.
   *Acceptance:* Inspector lists & fetches each.
 * [ ] **4.4** Expose prompt templates: `/explain-symbol`, `/refactor-aware`, `/find-bug`.

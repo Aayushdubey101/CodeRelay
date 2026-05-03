@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 4 — MCP Server
-**Next concrete task:** `4.1 Vendor claude-context-mcp`
+**Next concrete task:** `4.3 Resources + 4.4 Prompt templates`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,24 +74,27 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        4.1
-Title:     Vendor claude-context-mcp into packages/mcp-server/
-From:      work.md → Phase 4 → 4.1
-Acceptance: `npx @modelcontextprotocol/inspector packages/mcp-server` connects.
+ID:        4.3 + 4.4
+Title:     MCP resources + prompt templates
+From:      work.md → Phase 4 → 4.3, 4.4
+Acceptance: Inspector lists & fetches resources; prompt templates render with args.
 Sub-steps:
-  1. Read external/claude-context/packages/mcp/ (the MCP server source)
-  2. Copy stdio transport + server scaffolding into packages/mcp-server/src/
-  3. Strip Milvus-specific tools; keep server bootstrap + stdio transport
-  4. Add attribution header to copied files; update LICENSES/ + NOTICE.md
-  5. Export a startServer() from packages/mcp-server/src/index.ts
-  6. Verify `node packages/mcp-server/dist/index.js` starts without crashing
-  7. pnpm tsc --noEmit exits 0
+  1. Add 3 resources to server.ts (packages/mcp-server/src/server.ts):
+       repo://structure   → files table summary (counts by lang)
+       repo://project-md  → contents of PROJECT.md
+       repo://recent-changes → last 20 indexed files by mtime
+  2. Add 3 prompt templates:
+       /explain-symbol(qualified_name) → "Explain symbol X…"
+       /refactor-aware(file, description) → refactor prompt with file context
+       /find-bug(file, symptom) → debugging prompt with file chunks
+  3. pnpm tsc --noEmit exits 0
 ```
 
 ---
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-04: Task 4.1+4.2 complete — MCP server in packages/mcp-server/src/server.ts. McpServer (SDK 1.29) + StdioServerTransport. 10 tools: get_relevant_context, get_symbol, get_callers, get_callees, get_file_summary, search_semantic, find_similar_code, get_dependency_tree, recall_fact, record_decision. Server starts on stdio. 101/101 tests green.
 - 2026-05-04: Task 3.5 complete — ContextPager in packages/memory/src/pager.ts. LRU hot/cold split, SQLite cold storage, retrieve promotes to hot. 50k tokens runs in 8k window. 9 unit tests.
 - 2026-05-04: Task 3.4 complete — ContextManifest in packages/memory/src/manifest.ts. SQLite manifests table, UNIQUE(task_id,file,symbol,chunk_id) dedup on upsert. 9 unit tests. 101/101 green. Phase 3 complete.
 - 2026-05-03: Task 3.3 complete — LongTermMemory in packages/memory/src/longterm.ts. facts table (id/text/embedding BLOB/ts/tags). LIKE fallback + cosine-similarity vector search (injected Embedding). `coderelay remember` + `coderelay recall` CLI commands. 9 unit tests. 83/83 green.
