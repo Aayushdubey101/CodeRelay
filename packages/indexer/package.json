@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@coderelay/core": "workspace:*",
+    "@lancedb/lancedb": "^0.27.2",
+    "apache-arrow": "18",
     "better-sqlite3": "^12.9.0",
     "ollama": "^0.6.3",
     "openai": "^6.35.0",

@@ -162,8 +162,8 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
   1. exact qualified name → 2. local scope → 3. file-scope alias → 4. import-resolved → 5. type-system hint → 6. fuzzy name match (low confidence)
   Confidence stored on each edge.
   *Acceptance:* On fixture repo, ≥85% of true edges captured (gold set). (2026-05-03)
-* [ ] **2.5** **LanceDB adapter** replacing claude-context's Milvus adapter. Implement `VectorStore` interface (insert, search, delete).
-  *Acceptance:* Round-trip embed → store → search returns same chunk.
+* [x] **2.5** **LanceDB adapter** replacing claude-context's Milvus adapter. Implement `VectorStore` interface (insert, search, delete).
+  *Acceptance:* Round-trip embed → store → search returns same chunk. (2026-05-03)
 * [ ] **2.6** **Wire the pipeline**: file change → Merkle diff → re-extract symbols + edges → re-chunk → re-embed → upsert.
   *Acceptance:* Edit one function in 1000-file repo, verify only that file's rows update via SQL.
 * [ ] **2.7** **CLI commands**: `coderelay index <path>`, `coderelay index --watch`, `coderelay graph stats`, `coderelay search "<query>"`.

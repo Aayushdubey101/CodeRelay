@@ -11,3 +11,6 @@ export type { ExtractedSymbol, ExtractedEdge, ExtractResult, SymbolKind, EdgeKin
 
 export { EdgeResolver } from "./resolver.js";
 export type { ResolvedEdge, ResolutionStrategy } from "./resolver.js";
+
+export { LanceVectorStore } from "./upstream/vectordb/lancedb.js";
+export type { VectorDatabase, VectorDocument, SearchOptions, VectorSearchResult } from "./upstream/vectordb/types.js";

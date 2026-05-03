@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 2 — Indexer + Code Graph
-**Next concrete task:** `2.5 LanceDB adapter`
+**Next concrete task:** `2.6 Wire the pipeline`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,26 +74,30 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        2.5
-Title:     LanceDB adapter replacing Milvus stub
-From:      work.md → Phase 2 → 2.5
-Acceptance: Round-trip embed → store → search returns same chunk.
+ID:        2.6
+Title:     Wire the indexing pipeline
+From:      work.md → Phase 2 → 2.6
+Acceptance: Edit one function in a 1000-file repo, verify only that file's rows update via SQL.
 Sub-steps:
-  1. Add vectordb-lancedb deps to packages/indexer: @lancedb/lancedb (check npm for current pkg name)
-  2. Create packages/indexer/src/vectordb/lancedb.ts — LanceVectorStore implementing VectorDatabase interface
-       - upsert(chunks: VectorRecord[]) — insert or replace by id
-       - search(embedding: number[], k: number) → VectorRecord[]
-       - delete(ids: string[]) — remove by id
-       - close() — close table/connection
-  3. Wire LanceVectorStore into packages/indexer/src/upstream/vectordb/index.ts
-  4. Write round-trip test: embed 3 chunks, upsert, search, verify top result matches
-  5. pnpm tsc --noEmit exits 0
+  1. Create packages/indexer/src/pipeline.ts — IndexPipeline class:
+       - constructor(dbPath, lanceDbPath, embeddingProvider)
+       - indexFile(filePath, code, lang) — extract symbols → insert/update graph DB + embed chunks → upsert LanceDB
+       - indexFiles(files: Array<{path,code,lang}>) — batch index multiple files
+       - Uses Merkle synchronizer to skip unchanged files
+       - Uses SymbolExtractor + EdgeResolver
+       - Uses TextCodeSplitter for chunking
+       - Uses openGraphDb for SQLite graph
+       - Uses LanceVectorStore for vectors
+  2. Wire into packages/indexer/src/index.ts exports
+  3. Write fixture test: index 3 files, edit 1, re-index, verify only changed file's rows updated (check indexed_at timestamp)
+  4. pnpm tsc --noEmit exits 0
 ```
 
 ---
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-03: Task 2.5 complete — LanceVectorStore in packages/indexer/src/upstream/vectordb/lancedb.ts. Implements full VectorDatabase interface (createCollection, insert, search, delete, query, countRows, etc). apache-arrow 18 pinned for LanceDB peer dep. 7 round-trip tests. 47/47 tests green.
 - 2026-05-03: Task 2.4 complete — EdgeResolver in packages/indexer/src/resolver.ts. 6 strategies: exact(1.0)/local-scope(0.95)/file-alias(0.9)/import-resolved(0.85)/type-hint(0.75)/fuzzy-Levenshtein(0.5). 9 unit tests + gold-set recall test. 40/40 tests green. TypeScript strict clean.
 - 2026-05-03: Task 2.3 complete — SymbolExtractor in packages/indexer/src/extract.ts. web-tree-sitter WASM, 8 languages (TS/TSX/JS/Python/Go/Rust/Java/C++), named imports fix. 5 fixture tests: ≥95% symbol coverage, import/heritage/line-number/parent checks. 31/31 tests green. TypeScript strict clean.
 - 2026-05-03: Task 2.2 complete — SQLite graph schema (files/symbols/edges/chunks, WAL, FK cascade). openGraphDb() in packages/indexer/src/db/. `coderelay migrate` CLI command. 9 schema tests. 26/26 tests green.
