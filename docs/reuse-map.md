@@ -182,6 +182,93 @@ Everything in this repo. ELv2 prohibits competing use without a commercial licen
 
 ---
 
+---
+
+## 5. Phase 5 — CAO Provider Study (Task 5.1)
+
+> Detailed findings from reading `external/cao/src/cli_agent_orchestrator/providers/` (commit `1f2a048`).
+
+### 5.1 Claude Code provider (`claude_code.py`)
+
+**Subprocess command:**
+```
+claude --dangerously-skip-permissions [--model <name>] [--append-system-prompt <text>]
+       [--mcp-config '{"mcpServers":{...}}'] [--disallowedTools <tool> ...]
+```
+- Unset parent `CLAUDE*` env vars before spawning (prevent nested-session errors).
+- Inject `CAO_TERMINAL_ID` into every MCP server's `env` block.
+- System prompt: newlines escaped as `\n` before passing to `--append-system-prompt`.
+
+**MCP config format (passed to `--mcp-config`):**
+```json
+{
+  "mcpServers": {
+    "coderelay": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["/abs/path/to/packages/mcp-server/dist/index.js"],
+      "env": { "CODERELAY_DB": ".coderelay/graph.db" }
+    }
+  }
+}
+```
+
+**Tool restriction:** `--disallowedTools <native-tool-name>` (repeatable). CAO tool vocabulary (`execute_bash`, `fs_read`, `fs_write`, `fs_list`) maps to Claude Code native tool names (`Bash`, `Read`, `Edit`/`Write`, `Glob`/`Grep`).
+
+**Output handling in our implementation:** Use `execa` with `--print` flag to get non-interactive output on stdout. Not tmux (tmux = CAO's interactive approach; we use subprocess pipes).
+
+### 5.2 Gemini CLI provider (`gemini_cli.py`)
+
+**Subprocess command:**
+```
+cd <workspace> && gemini --yolo [--model <name>] [-i "<role-acknowledgment>"]
+```
+- **No** `--mcp-config` CLI flag — writes MCP servers to `~/.gemini/settings.json`.
+- System prompt goes in `GEMINI.md` file at workspace root (not a CLI flag).
+- Run from isolated per-task workspace dir so Gemini picks up its `GEMINI.md`.
+
+**MCP registration (writes to `~/.gemini/settings.json`):**
+```json
+{
+  "mcpServers": {
+    "coderelay": {
+      "command": "node",
+      "args": ["/abs/path/packages/mcp-server/dist/index.js"],
+      "env": {}
+    }
+  }
+}
+```
+
+**Tool restriction:** TOML policy files at `~/.gemini/policies/coderelay-<taskId>.toml` with `[[rule]] decision = "deny"` entries. Clean up after task.
+
+**Trusted folders:** Pre-register workspace in `~/.gemini/trustedFolders.json` before launch.
+
+### 5.3 Tool mapping (for our TS implementation)
+
+| CAO vocabulary | Claude Code native | Gemini CLI native |
+|---|---|---|
+| `execute_bash` | `Bash` | `run_shell_command` |
+| `fs_read` | `Read` | `read_file`, `list_directory`, `search_file_content`, `glob` |
+| `fs_write` | `Edit`, `Write` | `write_file`, `replace` |
+| `fs_list` | `Glob`, `Grep` | `list_directory`, `glob`, `search_file_content` |
+| `*` (wildcard) | unrestricted | unrestricted |
+
+### 5.4 What we skip vs port
+
+**Port to TS:**
+- Tool mapping table (see above) → `packages/sub-agents/src/utils/tool-mapping.ts`
+- MCP config generation → inline in `packages/sub-agents/src/providers/`
+- `execa` subprocess wrapper (not tmux) → `packages/sub-agents/src/runner.ts`
+
+**Skip:**
+- `tmux.py` — replaced by `execa` piped streams
+- All providers except claude_code + gemini_cli (codex, kiro, kimi, q, opencode, copilot)
+- FastAPI REST layer, web dashboard
+- Plugin system
+
+---
+
 ## Summary: Phase-by-Phase Porting Schedule
 
 | Phase | Upstream files ported |

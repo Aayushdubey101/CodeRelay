@@ -211,8 +211,8 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
 
 > **Strategy:** Study CAO's provider abstractions, write our own TypeScript wrappers (CAO is Python).
 
-* [ ] **5.1** Read `external/cao/cli_agent_orchestrator/providers/`. Document patterns in `docs/reuse-map.md`.
-  *Acceptance:* Notes cover at least claude_code, gemini_cli, codex providers.
+* [x] **5.1** Read `external/cao/cli_agent_orchestrator/providers/`. Document patterns in `docs/reuse-map.md`.
+  *Acceptance:* Notes cover at least claude_code, gemini_cli, codex providers. (2026-05-04)
 * [ ] **5.2** Spawn Claude Code as subprocess via `execa`, with our MCP server registered in `.mcp.json` (auto-generated in sandbox CWD).
   *Acceptance:* `coderelay run --agent claude "rename foo to bar"` makes Claude Code call OUR `get_symbol`, not raw grep.
 * [ ] **5.3** Same for Gemini CLI (`~/.gemini/settings.json`, project-scoped).
