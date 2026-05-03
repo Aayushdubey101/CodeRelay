@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 3 — Memory System
-**Next concrete task:** `3.1 Working memory`
+**Next concrete task:** `3.2 Session memory`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,24 +74,32 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        3.1
-Title:     Working memory — in-process Map keyed by task ID
-From:      work.md → Phase 3 → 3.1
-Acceptance: Two parallel tasks don't see each other's memory.
+ID:        3.2
+Title:     Session memory — SQLite sessions + session_turns + auto-summarize
+From:      work.md → Phase 3 → 3.2
+Acceptance: After 25 turns, summary row appears, oldest turns archived.
 Sub-steps:
-  1. Create packages/memory/src/working.ts
-       - Export class WorkingMemory with get/set/delete/clear(taskId) methods
-       - Backed by Map<taskId, Map<key, unknown>>
-       - No persistence (process lifetime only)
-  2. Export from packages/memory/src/index.ts
-  3. Write unit test: spawn two task IDs, assert isolation
-  4. pnpm tsc --noEmit exits 0
+  1. Create packages/memory/src/session.ts
+       - SQLite tables: sessions (id, created_at, updated_at, summary)
+                        session_turns (id, session_id, role, content, ts)
+       - Export class SessionMemory with:
+           openSession(id?) → sessionId
+           addTurn(sessionId, role, content)
+           getTurns(sessionId, limit?) → turn[]
+           getSession(sessionId) → session row
+           close()
+  2. Auto-summarize: after every 20 turns, call router's 'summarize' tag,
+     write result to sessions.summary, archive turns older than last 5
+  3. Export from packages/memory/src/index.ts
+  4. Write unit tests: addTurn, getTurns, auto-summarize triggers at turn 21
+  5. pnpm tsc --noEmit exits 0
 ```
 
 ---
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-03: Task 3.1 complete — WorkingMemory in packages/memory/src/working.ts. Map<taskId, Map<key, unknown>>, full isolation between tasks. get/set/delete/clear/keys/has API. 10 unit tests. 63/63 tests green.
 - 2026-05-03: Task 2.7 complete — CLI commands: `coderelay index <path>`, `coderelay graph stats`, `coderelay search "<query>"` in packages/cli/src/index.ts. walkFiles() skips node_modules/dist/.git. Batch processing (50 files/batch) with progress output. Indexed own packages/ in 0.1s (44 files, 232 symbols, 641 chunks). 53/53 tests green. Phase 2 complete.
 - 2026-05-03: Task 2.6 complete — IndexPipeline in packages/indexer/src/pipeline.ts. File hash-based Merkle diffing (skip unchanged), SQLite transaction per file (cascade delete old symbols→edges→chunks, reinsert), LanceDB embedding upsert on embedding provider present. 5 pipeline tests (index/skip/re-index/dedup/edges). 53/53 tests green.
 - 2026-05-03: Task 2.5 complete — LanceVectorStore in packages/indexer/src/upstream/vectordb/lancedb.ts. Implements full VectorDatabase interface (createCollection, insert, search, delete, query, countRows, etc). apache-arrow 18 pinned for LanceDB peer dep. 7 round-trip tests. 47/47 tests green.
