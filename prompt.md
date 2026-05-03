@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 2 — Indexer + Code Graph
-**Next concrete task:** `2.4 6-strategy edge resolver`
+**Next concrete task:** `2.5 LanceDB adapter`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,21 +74,19 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        2.4
-Title:     6-strategy edge resolver
-From:      work.md → Phase 2 → 2.4
-Acceptance: On fixture repo, ≥85% of true edges captured (gold set).
+ID:        2.5
+Title:     LanceDB adapter replacing Milvus stub
+From:      work.md → Phase 2 → 2.5
+Acceptance: Round-trip embed → store → search returns same chunk.
 Sub-steps:
-  1. Read packages/indexer/src/extract.ts — understand current ExtractedEdge shape and how dstQualifiedName is currently a raw string
-  2. Create packages/indexer/src/resolver.ts — EdgeResolver class implementing:
-       Strategy 1: exact qualified name match (confidence 1.0)
-       Strategy 2: local scope match (same file/class, confidence 0.95)
-       Strategy 3: file-scope alias match (import aliases, confidence 0.9)
-       Strategy 4: import-resolved (follow import edges to dst module, confidence 0.85)
-       Strategy 5: type-system hint (TypeScript type annotations, confidence 0.75)
-       Strategy 6: fuzzy name match (Levenshtein ≤ 2, confidence 0.5)
-  3. resolve(edges, symbols, fileSymbols) → ResolvedEdge[] with updated dstQualifiedName and confidence
-  4. Write fixture test asserting ≥85% recall on a gold set of 20 known call edges
+  1. Add vectordb-lancedb deps to packages/indexer: @lancedb/lancedb (check npm for current pkg name)
+  2. Create packages/indexer/src/vectordb/lancedb.ts — LanceVectorStore implementing VectorDatabase interface
+       - upsert(chunks: VectorRecord[]) — insert or replace by id
+       - search(embedding: number[], k: number) → VectorRecord[]
+       - delete(ids: string[]) — remove by id
+       - close() — close table/connection
+  3. Wire LanceVectorStore into packages/indexer/src/upstream/vectordb/index.ts
+  4. Write round-trip test: embed 3 chunks, upsert, search, verify top result matches
   5. pnpm tsc --noEmit exits 0
 ```
 
@@ -96,6 +94,7 @@ Sub-steps:
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-03: Task 2.4 complete — EdgeResolver in packages/indexer/src/resolver.ts. 6 strategies: exact(1.0)/local-scope(0.95)/file-alias(0.9)/import-resolved(0.85)/type-hint(0.75)/fuzzy-Levenshtein(0.5). 9 unit tests + gold-set recall test. 40/40 tests green. TypeScript strict clean.
 - 2026-05-03: Task 2.3 complete — SymbolExtractor in packages/indexer/src/extract.ts. web-tree-sitter WASM, 8 languages (TS/TSX/JS/Python/Go/Rust/Java/C++), named imports fix. 5 fixture tests: ≥95% symbol coverage, import/heritage/line-number/parent checks. 31/31 tests green. TypeScript strict clean.
 - 2026-05-03: Task 2.2 complete — SQLite graph schema (files/symbols/edges/chunks, WAL, FK cascade). openGraphDb() in packages/indexer/src/db/. `coderelay migrate` CLI command. 9 schema tests. 26/26 tests green.
 - 2026-05-03: Task 2.1 complete — vendored claude-context-core splitter/sync/embedding into packages/indexer/src/upstream/. Stripped Milvus (lancedb-stub.ts). Replaced native tree-sitter with regex TextCodeSplitter (web-tree-sitter in 2.3). 17 tests passing. TypeScript strict typecheck clean.

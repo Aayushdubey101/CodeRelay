@@ -8,3 +8,6 @@ export type { FileRow, SymbolRow, EdgeRow, ChunkRow } from "./db/index.js";
 
 export { SymbolExtractor } from "./extract.js";
 export type { ExtractedSymbol, ExtractedEdge, ExtractResult, SymbolKind, EdgeKind } from "./extract.js";
+
+export { EdgeResolver } from "./resolver.js";
+export type { ResolvedEdge, ResolutionStrategy } from "./resolver.js";
