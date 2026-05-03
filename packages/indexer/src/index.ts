@@ -14,3 +14,6 @@ export type { ResolvedEdge, ResolutionStrategy } from "./resolver.js";
 
 export { LanceVectorStore } from "./upstream/vectordb/lancedb.js";
 export type { VectorDatabase, VectorDocument, SearchOptions, VectorSearchResult } from "./upstream/vectordb/types.js";
+
+export { IndexPipeline } from "./pipeline.js";
+export type { PipelineOptions, IndexStats } from "./pipeline.js";

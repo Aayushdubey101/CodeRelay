@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 2 — Indexer + Code Graph
-**Next concrete task:** `2.6 Wire the pipeline`
+**Next concrete task:** `2.7 CLI commands`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,23 +74,21 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        2.6
-Title:     Wire the indexing pipeline
-From:      work.md → Phase 2 → 2.6
-Acceptance: Edit one function in a 1000-file repo, verify only that file's rows update via SQL.
+ID:        2.7
+Title:     CLI commands: coderelay index, graph stats, search
+From:      work.md → Phase 2 → 2.7
+Acceptance: Indexing CodeRelay's own repo finishes in <60s.
 Sub-steps:
-  1. Create packages/indexer/src/pipeline.ts — IndexPipeline class:
-       - constructor(dbPath, lanceDbPath, embeddingProvider)
-       - indexFile(filePath, code, lang) — extract symbols → insert/update graph DB + embed chunks → upsert LanceDB
-       - indexFiles(files: Array<{path,code,lang}>) — batch index multiple files
-       - Uses Merkle synchronizer to skip unchanged files
-       - Uses SymbolExtractor + EdgeResolver
-       - Uses TextCodeSplitter for chunking
-       - Uses openGraphDb for SQLite graph
-       - Uses LanceVectorStore for vectors
-  2. Wire into packages/indexer/src/index.ts exports
-  3. Write fixture test: index 3 files, edit 1, re-index, verify only changed file's rows updated (check indexed_at timestamp)
-  4. pnpm tsc --noEmit exits 0
+  1. Add `coderelay index <path>` command to packages/cli/src/index.ts
+       - Walks all .ts/.js/.py/.go/.rs/.java/.cpp files under <path>
+       - Calls IndexPipeline.indexFiles()
+       - Prints progress and final stats
+  2. Add `coderelay graph stats` command
+       - Reads graph DB, prints: files, symbols, edges, chunks counts
+  3. Add `coderelay search "<query>"` command (semantic stub)
+       - For now: SQL LIKE search on chunks.content, prints top 5 matches
+  4. Test all 3 commands against packages/ directory (sanity check, not automated)
+  5. pnpm tsc --noEmit exits 0
 ```
 
 ---
