@@ -4,6 +4,7 @@ import { createLogger } from "@coderelay/core";
 import { Command } from "commander";
 import { UsageTracker } from "@coderelay/router";
 import { openGraphDb, IndexPipeline } from "@coderelay/indexer";
+import { LongTermMemory } from "@coderelay/memory";
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join, extname, resolve } from "node:path";
 
@@ -252,6 +253,46 @@ program
       console.log(`    ${preview}`);
       console.log();
     }
+  });
+
+// --- remember ---
+program
+  .command("remember <text>")
+  .description("Save a fact to long-term memory")
+  .option("--db <path>", "Path to longterm.db", ".coderelay/longterm.db")
+  .option("--tags <tags>", "Comma-separated tags", "")
+  .action(async (text: string, opts: { db: string; tags: string }) => {
+    const mem = new LongTermMemory({ dbPath: opts.db });
+    const tags = opts.tags ? opts.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
+    const id = await mem.recordFact(text, tags);
+    mem.close();
+    console.log(`Saved fact ${id}`);
+  });
+
+// --- recall ---
+program
+  .command("recall <query>")
+  .description("Search long-term memory for facts matching a query")
+  .option("--db <path>", "Path to longterm.db", ".coderelay/longterm.db")
+  .option("-n, --limit <n>", "Max results", "5")
+  .action(async (query: string, opts: { db: string; limit: string }) => {
+    const mem = new LongTermMemory({ dbPath: opts.db });
+    const limit = Math.max(1, parseInt(opts.limit, 10) || 5);
+    const facts = await mem.searchText(query, limit);
+    mem.close();
+
+    if (facts.length === 0) {
+      console.log(`No facts found for "${query}".`);
+      return;
+    }
+
+    console.log(`\nRecall: "${query}" — ${facts.length} result(s)\n`);
+    for (const [i, f] of facts.entries()) {
+      const date = new Date(f.ts).toISOString().slice(0, 10);
+      const tags = f.tags ? ` [${f.tags}]` : "";
+      console.log(`[${i + 1}] (${date}${tags}) ${f.text}`);
+    }
+    console.log();
   });
 
 program.parse(process.argv);

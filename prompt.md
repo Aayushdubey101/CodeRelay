@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 3 — Memory System
-**Next concrete task:** `3.3 Long-term memory`
+**Next concrete task:** `3.4 Context manifest`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,32 +74,30 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        3.3
-Title:     Long-term memory — facts table + PROJECT.md auto-update
-From:      work.md → Phase 3 → 3.3
-Acceptance: Restart CLI: `coderelay recall "auth flow"` returns prior facts.
+ID:        3.4
+Title:     Context manifest — per-task prompt assembly log
+From:      work.md → Phase 3 → 3.4
+Acceptance: Same task run twice → second uses 100% of prior manifest, zero re-parses.
 Sub-steps:
-  1. Create packages/memory/src/longterm.ts
-       - SQLite table: facts (id, text, embedding BLOB nullable, ts, tags TEXT)
-       - Export class LongTermMemory with:
-           recordFact(text, tags?) → id
-           searchText(query, limit?) → fact[] (SQL LIKE fallback, vector if embedding given)
-           deleteFact(id)
+  1. Create packages/memory/src/manifest.ts
+       - SQLite table: manifests (task_id, file, symbol, chunk_id, tokens, reason, ts)
+       - Export class ContextManifest with:
+           record(taskId, entry: ManifestEntry) — log one context item
+           getManifest(taskId) → ManifestEntry[]
+           hasManifest(taskId) → boolean
+           totalTokens(taskId) → number
+           clear(taskId)
            close()
-       - Optional Embedding injected for vector search (same interface as indexer)
-  2. Add `coderelay recall "<query>"` CLI command (packages/cli/src/index.ts)
-       - Opens LongTermMemory, calls searchText, prints results
-  3. Add `coderelay remember "<text>"` CLI command
-       - Calls recordFact, prints saved ID
-  4. Export from packages/memory/src/index.ts
-  5. Unit tests: recordFact, searchText LIKE, searchText with mock embedding
-  6. pnpm tsc --noEmit exits 0
+  2. Export from packages/memory/src/index.ts
+  3. Unit tests: record, getManifest, hasManifest, totalTokens, deduplication
+  4. pnpm tsc --noEmit exits 0
 ```
 
 ---
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-03: Task 3.3 complete — LongTermMemory in packages/memory/src/longterm.ts. facts table (id/text/embedding BLOB/ts/tags). LIKE fallback + cosine-similarity vector search (injected Embedding). `coderelay remember` + `coderelay recall` CLI commands. 9 unit tests. 83/83 green.
 - 2026-05-03: Task 3.2 complete — SessionMemory in packages/memory/src/session.ts. SQLite sessions+session_turns, WAL, FK cascade. Auto-summarize every N turns (injected Summarizer fn), keeps last K turns active. 11 unit tests including 25-turn acceptance scenario. 74/74 tests green.
 - 2026-05-03: Task 3.1 complete — WorkingMemory in packages/memory/src/working.ts. Map<taskId, Map<key, unknown>>, full isolation between tasks. get/set/delete/clear/keys/has API. 10 unit tests. 63/63 tests green.
 - 2026-05-03: Task 2.7 complete — CLI commands: `coderelay index <path>`, `coderelay graph stats`, `coderelay search "<query>"` in packages/cli/src/index.ts. walkFiles() skips node_modules/dist/.git. Batch processing (50 files/batch) with progress output. Indexed own packages/ in 0.1s (44 files, 232 symbols, 641 chunks). 53/53 tests green. Phase 2 complete.
