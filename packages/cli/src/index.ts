@@ -5,6 +5,7 @@ import { Command } from "commander";
 import { UsageTracker } from "@coderelay/router";
 import { openGraphDb, IndexPipeline } from "@coderelay/indexer";
 import { LongTermMemory } from "@coderelay/memory";
+import { runAgent, type AgentName } from "@coderelay/sub-agents";
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join, extname, resolve } from "node:path";
 
@@ -253,6 +254,32 @@ program
       console.log(`    ${preview}`);
       console.log();
     }
+  });
+
+// --- run ---
+program
+  .command("run <prompt>")
+  .description("Run a prompt via a sub-agent (claude or gemini) with CodeRelay's MCP server")
+  .option("--agent <name>", "Sub-agent to use: claude | gemini", "claude")
+  .option("--model <model>", "Override model for the sub-agent")
+  .option("--mcp-bin <path>", "Path to MCP server binary (default: auto-detect)")
+  .option("--cwd <path>", "Working directory for sub-agent")
+  .option("--timeout <ms>", "Timeout in milliseconds", "300000")
+  .action(async (prompt: string, opts: { agent: string; model?: string; mcpBin?: string; cwd?: string; timeout: string }) => {
+    const agent = opts.agent as AgentName;
+    if (agent !== 'claude' && agent !== 'gemini') {
+      console.error(`Unknown agent: ${agent}. Use 'claude' or 'gemini'.`);
+      process.exit(1);
+    }
+
+    console.log(`Running via ${agent}...`);
+    const runOpts = { agent, prompt, timeoutMs: parseInt(opts.timeout, 10) || 300_000 } as Parameters<typeof runAgent>[0];
+    if (opts.model) runOpts.model = opts.model;
+    if (opts.mcpBin) runOpts.mcpServerBinPath = opts.mcpBin;
+    if (opts.cwd) runOpts.cwd = opts.cwd;
+    const output = await runAgent(runOpts);
+
+    console.log(output);
   });
 
 // --- remember ---

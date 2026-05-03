@@ -22,6 +22,7 @@
     "@coderelay/indexer": "workspace:*",
     "@coderelay/memory": "workspace:*",
     "@coderelay/router": "workspace:*",
+    "@coderelay/sub-agents": "workspace:*",
     "commander": "^12.1.0"
   },
   "devDependencies": {

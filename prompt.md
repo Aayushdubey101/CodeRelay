@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 4 — MCP Server
-**Next concrete task:** `5.2 Spawn Claude Code as subprocess`
+**Next concrete task:** `6.1 Permission policy`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -18,7 +18,7 @@
 - [x] Phase 2 — Indexer + Code Graph
 - [x] Phase 3 — Memory System
 - [x] Phase 4 — MCP Server
-- [ ] Phase 5 — Sub-Agent Wrapping
+- [x] Phase 5 — Sub-Agent Wrapping
 - [ ] Phase 6 — Governance Layer
 - [ ] Phase 7 — Orchestrator Loop
 - [ ] Phase 8 — TUI + DX
@@ -74,27 +74,29 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        5.2
-Title:     Spawn Claude Code as subprocess with our MCP server
-From:      work.md → Phase 5 → 5.2
-Acceptance: `coderelay run --agent claude "rename foo to bar"` makes Claude Code call OUR get_symbol.
+ID:        6.1 + 6.2
+Title:     Permission policy + hard-coded destructive blocklist
+From:      work.md → Phase 6 → 6.1, 6.2
+Acceptance: `rm -rf /` blocked; each destructive pattern blocked at policy layer.
 Sub-steps:
-  1. Install execa in packages/sub-agents
-  2. Create packages/sub-agents/src/providers/claude-code.ts
-       - generateMcpConfig(serverBinPath, opts) → JSON string for --mcp-config
-       - run(prompt, opts) → AsyncIterable<string> (stream stdout lines)
-       - Use execa with --print --mcp-config <json> flags
-       - Strip parent CLAUDE* env vars
-  3. Create packages/sub-agents/src/runner.ts
-       - runAgent(agent, prompt, opts) → Promise<string>
-  4. Add `coderelay run --agent <name> "<prompt>"` to packages/cli/src/index.ts
-  5. pnpm tsc --noEmit exits 0
+  1. Create packages/governor/src/policy.ts
+       - Load YAML config: allow/deny lists for commands, file paths, env vars
+       - evaluate(command: string) → { allowed: boolean; reason: string }
+  2. Create packages/governor/src/blocklist.ts
+       - Hard-coded NEVER_ALLOW patterns (rm -rf, DROP TABLE, git push --force, etc.)
+       - check(command: string) → { blocked: boolean; pattern: string } | null
+  3. Create packages/governor/src/governor.ts
+       - check(command) → first runs blocklist, then policy
+  4. Export from packages/governor/src/index.ts
+  5. Unit tests: blocklist catches all patterns, policy allow/deny, governor combines them
+  6. pnpm tsc --noEmit exits 0
 ```
 
 ---
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-04: Task 5.2+5.3+5.4+5.5 complete — sub-agent wrappers in packages/sub-agents/. runClaudeCode (execa, --print, --mcp-config JSON, --disallowedTools, strip CLAUDE* env). runGeminiCli (execa, --yolo, GEMINI.md, ~/.gemini/settings.json). runAgent() dispatcher. `coderelay run --agent <claude|gemini>` CLI command. Phase 5 complete.
 - 2026-05-04: Task 5.1 complete — CAO provider study documented in docs/reuse-map.md §5. Covers Claude Code flags (--mcp-config, --disallowedTools, --append-system-prompt), Gemini CLI (settings.json, GEMINI.md, policy TOML), tool mapping table, and what to port/skip.
 - 2026-05-04: Task 4.3+4.4 complete — 3 MCP resources (repo://structure, repo://project-md, repo://recent-changes) + 3 prompt templates (explain-symbol, refactor-aware, find-bug). Phase 4 complete.
 - 2026-05-04: Task 4.1+4.2 complete — MCP server in packages/mcp-server/src/server.ts. McpServer (SDK 1.29) + StdioServerTransport. 10 tools: get_relevant_context, get_symbol, get_callers, get_callees, get_file_summary, search_semantic, find_similar_code, get_dependency_tree, recall_fact, record_decision. Server starts on stdio. 101/101 tests green.

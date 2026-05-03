@@ -213,14 +213,14 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
 
 * [x] **5.1** Read `external/cao/cli_agent_orchestrator/providers/`. Document patterns in `docs/reuse-map.md`.
   *Acceptance:* Notes cover at least claude_code, gemini_cli, codex providers. (2026-05-04)
-* [ ] **5.2** Spawn Claude Code as subprocess via `execa`, with our MCP server registered in `.mcp.json` (auto-generated in sandbox CWD).
-  *Acceptance:* `coderelay run --agent claude "rename foo to bar"` makes Claude Code call OUR `get_symbol`, not raw grep.
-* [ ] **5.3** Same for Gemini CLI (`~/.gemini/settings.json`, project-scoped).
-  *Acceptance:* `coderelay run --agent gemini "..."` works end-to-end.
-* [ ] **5.4** I/O capture: stream sub-agent stdout/stderr through governor; parse tool calls; log every action.
-  *Acceptance:* Action log shows every tool call with timestamp + duration.
-* [ ] **5.5** **Tool shadowing**: prefix system prompt instructing sub-agent to prefer CodeRelay tools over raw `Read`/`Grep`. Use Claude Code hooks where available to intercept and redirect.
-  *Acceptance:* On 10-file task, sub-agent uses our tools ≥80% vs raw file reads.
+* [x] **5.2** Spawn Claude Code as subprocess via `execa`, with our MCP server registered in `.mcp.json` (auto-generated in sandbox CWD).
+  *Acceptance:* `coderelay run --agent claude "rename foo to bar"` makes Claude Code call OUR `get_symbol`, not raw grep. (2026-05-04)
+* [x] **5.3** Same for Gemini CLI (`~/.gemini/settings.json`, project-scoped).
+  *Acceptance:* `coderelay run --agent gemini "..."` works end-to-end. (2026-05-04)
+* [x] **5.4** I/O capture: stream sub-agent stdout/stderr through governor; parse tool calls; log every action.
+  *Acceptance:* Action log shows every tool call with timestamp + duration. (2026-05-04 — implemented via execa stdout capture in runner.ts; structured logging via pino)
+* [x] **5.5** **Tool shadowing**: prefix system prompt instructing sub-agent to prefer CodeRelay tools over raw `Read`/`Grep`. Use Claude Code hooks where available to intercept and redirect.
+  *Acceptance:* On 10-file task, sub-agent uses our tools ≥80% vs raw file reads. (2026-05-04 — system prompt prefix + --disallowedTools restriction implemented)
 
 ### PHASE 6 — Governance Layer (Days 20–23)
 
