@@ -147,7 +147,7 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
   - `embedding/` (provider abstraction — already supports OpenAI/Voyage/Ollama/Gemini)
   Document changes in `packages/indexer/UPSTREAM.md`.
   *Acceptance:* Chunker produces same chunks as upstream on a fixture file. (2026-05-03)
-* [ ] **2.2** **Define graph schema in SQLite** (better-sqlite3 with WAL):
+* [x] **2.2** **Define graph schema in SQLite** (better-sqlite3 with WAL): (2026-05-03)
   ```sql
   files (id, path, hash, lang, mtime, indexed_at)
   symbols (id, file_id, parent_id, kind, name, qualified_name, start, end, signature, docstring)

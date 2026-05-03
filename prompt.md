@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 2 — Indexer + Code Graph
-**Next concrete task:** `2.2 Define graph schema in SQLite`
+**Next concrete task:** `2.3 Port graphify extract.py to TypeScript`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,22 +74,20 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        2.2
-Title:     Define graph schema in SQLite
-From:      work.md → Phase 2 → 2.2
-Acceptance: `pnpm migrate` creates schema; fixture insert + query works.
+ID:        2.3
+Title:     Port graphify extract.py to TypeScript as packages/indexer/src/extract.ts
+From:      work.md → Phase 2 → 2.3
+Acceptance: On a 200-line TS file, extracts ≥95% of expected symbols (manual diff vs graphify Python output).
 Sub-steps:
-  1. Add better-sqlite3 (+ @types/better-sqlite3) to packages/indexer/package.json
-  2. Create packages/indexer/src/db/schema.ts — DDL constants (CREATE TABLE IF NOT EXISTS):
-       files (id INTEGER PK, path TEXT UNIQUE, hash TEXT, lang TEXT, mtime INTEGER, indexed_at INTEGER)
-       symbols (id INTEGER PK, file_id INTEGER FK, parent_id INTEGER, kind TEXT, name TEXT,
-                qualified_name TEXT, start INTEGER, end INTEGER, signature TEXT, docstring TEXT)
-       edges (src INTEGER, dst INTEGER, kind TEXT, confidence REAL, PRIMARY KEY (src,dst,kind))
-       chunks (id INTEGER PK, symbol_id INTEGER, file_id INTEGER FK, content TEXT,
-               token_count INTEGER, embedding_ref TEXT)
-  3. Create packages/indexer/src/db/migrate.ts — opens/creates .coderelay/graph.db (WAL mode), runs DDL
-  4. Wire `coderelay migrate` CLI command in packages/cli/
-  5. Write test: insert one file row + one symbol row, query back, assert fields match
+  1. Read external/graphify/src/ (Python) — understand symbol/call extraction logic
+  2. Add web-tree-sitter + tree-sitter grammar WASM packages to indexer deps
+  3. Create packages/indexer/src/extract.ts — SymbolExtractor class:
+       - loadLanguage(lang) — loads WASM grammar for lang
+       - extractSymbols(code, lang, filePath) → SymbolRow[] (inserts into graph DB)
+       - extractEdges(symbols) → EdgeRow[] (call/import/extends edges)
+     Cover: TypeScript, JavaScript, Python, Go, Rust, Java, C/C++
+  4. Wire extracted symbols into graph DB via openGraphDb
+  5. Write fixture test on a 200-line TS file: assert symbol count ≥ expected minimum
   6. pnpm tsc --noEmit exits 0
 ```
 
@@ -97,6 +95,7 @@ Sub-steps:
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-03: Task 2.2 complete — SQLite graph schema (files/symbols/edges/chunks, WAL, FK cascade). openGraphDb() in packages/indexer/src/db/. `coderelay migrate` CLI command. 9 schema tests. 26/26 tests green.
 - 2026-05-03: Task 2.1 complete — vendored claude-context-core splitter/sync/embedding into packages/indexer/src/upstream/. Stripped Milvus (lancedb-stub.ts). Replaced native tree-sitter with regex TextCodeSplitter (web-tree-sitter in 2.3). 17 tests passing. TypeScript strict typecheck clean.
 - 2026-05-01: Tasks 0.7 + Phase 1 (1.1–1.5) complete — Pino logging, LLMProvider interface, 4 provider adapters (Anthropic/OpenAI/Gemini/Ollama), YAML routing engine with hot-reload, SQLite usage tracking, retry + circuit breaker. `coderelay usage --today` CLI command. 11 tests passing.
 - 2026-04-29: Task 0.1 complete — pnpm init, tsconfig (strict/ESNext/NodeNext), .gitignore, .gitattributes, .editorconfig, MIT LICENSE, src/index.ts stub, moved docs to docs/. `pnpm tsc --noEmit` exits 0. Initial commit `f0e0f20`.

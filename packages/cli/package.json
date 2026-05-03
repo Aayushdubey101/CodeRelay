@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@coderelay/core": "workspace:*",
+    "@coderelay/indexer": "workspace:*",
     "@coderelay/router": "workspace:*",
     "commander": "^12.1.0"
   },

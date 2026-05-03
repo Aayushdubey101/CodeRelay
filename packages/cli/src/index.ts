@@ -3,6 +3,7 @@ import { type Logger } from "@coderelay/core";
 import { createLogger } from "@coderelay/core";
 import { Command } from "commander";
 import { UsageTracker } from "@coderelay/router";
+import { openGraphDb } from "@coderelay/indexer";
 
 export const log: Logger = createLogger("@coderelay/cli");
 
@@ -63,6 +64,19 @@ program
         ("$" + totalCost.toFixed(6)).padStart(10)
     );
     console.log();
+  });
+
+program
+  .command("migrate")
+  .description("Create or migrate the code graph database")
+  .option("--path <path>", "Path to graph.db (default: .coderelay/graph.db)")
+  .action((opts: { path?: string }) => {
+    const db = openGraphDb(opts.path);
+    const tables = (
+      db.prepare(`SELECT name FROM sqlite_master WHERE type='table' ORDER BY name`).all() as { name: string }[]
+    ).map((r) => r.name);
+    db.close();
+    console.log(`Migration complete. Tables: ${tables.join(", ")}`);
   });
 
 program.parse(process.argv);

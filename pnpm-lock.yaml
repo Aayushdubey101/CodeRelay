@@ -20,6 +20,9 @@ importers:
       '@coderelay/core':
         specifier: workspace:*
         version: link:../core
+      '@coderelay/indexer':
+        specifier: workspace:*
+        version: link:../indexer
       '@coderelay/router':
         specifier: workspace:*
         version: link:../router
@@ -65,6 +68,9 @@ importers:
       '@coderelay/core':
         specifier: workspace:*
         version: link:../core
+      better-sqlite3:
+        specifier: ^12.9.0
+        version: 12.9.0
       ollama:
         specifier: ^0.6.3
         version: 0.6.3
@@ -72,6 +78,9 @@ importers:
         specifier: ^6.35.0
         version: 6.35.0
     devDependencies:
+      '@types/better-sqlite3':
+        specifier: ^7.6.13
+        version: 7.6.13
       '@types/node':
         specifier: ^20.19.39
         version: 20.19.39
