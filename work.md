@@ -179,10 +179,10 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
   *Acceptance:* After 25 turns, summary row appears, oldest turns archived. (2026-05-03)
 * [x] **3.3** **Long-term memory**: `facts` table (text + embedding) + auto-maintained `PROJECT.md` (architecture decisions, conventions, glossary). Updated by LLM at session end.
   *Acceptance:* Restart CLI: `coderelay recall "auth flow"` returns prior facts. (2026-05-03)
-* [ ] **3.4** **Context manifest**: every prompt assembly logs `{file, symbol, chunk_id, tokens, reason}` per task. Prevents re-loading.
-  *Acceptance:* Same task run twice → second uses 100% of prior manifest, zero re-parses.
-* [ ] **3.5** **MemGPT-style paging**: hot context in prompt, cold retrieved on tool call. Hard cap on prompt tokens (configurable).
-  *Acceptance:* Task "needing" 50k tokens of context runs in 8k window via paged retrieval.
+* [x] **3.4** **Context manifest**: every prompt assembly logs `{file, symbol, chunk_id, tokens, reason}` per task. Prevents re-loading.
+  *Acceptance:* Same task run twice → second uses 100% of prior manifest, zero re-parses. (2026-05-04)
+* [x] **3.5** **MemGPT-style paging**: hot context in prompt, cold retrieved on tool call. Hard cap on prompt tokens (configurable).
+  *Acceptance:* Task "needing" 50k tokens of context runs in 8k window via paged retrieval. (2026-05-04)
 
 ### PHASE 4 — MCP Server (Days 15–16)
 

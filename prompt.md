@@ -7,8 +7,8 @@
 
 ## 🟢 Phase Pointer
 
-**Currently on:** Phase 3 — Memory System
-**Next concrete task:** `3.4 Context manifest`
+**Currently on:** Phase 4 — MCP Server
+**Next concrete task:** `4.1 Vendor claude-context-mcp`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -16,7 +16,7 @@
 - [x] Phase 0 — Setup & Reuse Audit
 - [x] Phase 1 — LLM Router
 - [x] Phase 2 — Indexer + Code Graph
-- [ ] Phase 3 — Memory System
+- [x] Phase 3 — Memory System
 - [ ] Phase 4 — MCP Server
 - [ ] Phase 5 — Sub-Agent Wrapping
 - [ ] Phase 6 — Governance Layer
@@ -74,29 +74,26 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        3.4
-Title:     Context manifest — per-task prompt assembly log
-From:      work.md → Phase 3 → 3.4
-Acceptance: Same task run twice → second uses 100% of prior manifest, zero re-parses.
+ID:        4.1
+Title:     Vendor claude-context-mcp into packages/mcp-server/
+From:      work.md → Phase 4 → 4.1
+Acceptance: `npx @modelcontextprotocol/inspector packages/mcp-server` connects.
 Sub-steps:
-  1. Create packages/memory/src/manifest.ts
-       - SQLite table: manifests (task_id, file, symbol, chunk_id, tokens, reason, ts)
-       - Export class ContextManifest with:
-           record(taskId, entry: ManifestEntry) — log one context item
-           getManifest(taskId) → ManifestEntry[]
-           hasManifest(taskId) → boolean
-           totalTokens(taskId) → number
-           clear(taskId)
-           close()
-  2. Export from packages/memory/src/index.ts
-  3. Unit tests: record, getManifest, hasManifest, totalTokens, deduplication
-  4. pnpm tsc --noEmit exits 0
+  1. Read external/claude-context/packages/mcp/ (the MCP server source)
+  2. Copy stdio transport + server scaffolding into packages/mcp-server/src/
+  3. Strip Milvus-specific tools; keep server bootstrap + stdio transport
+  4. Add attribution header to copied files; update LICENSES/ + NOTICE.md
+  5. Export a startServer() from packages/mcp-server/src/index.ts
+  6. Verify `node packages/mcp-server/dist/index.js` starts without crashing
+  7. pnpm tsc --noEmit exits 0
 ```
 
 ---
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-04: Task 3.5 complete — ContextPager in packages/memory/src/pager.ts. LRU hot/cold split, SQLite cold storage, retrieve promotes to hot. 50k tokens runs in 8k window. 9 unit tests.
+- 2026-05-04: Task 3.4 complete — ContextManifest in packages/memory/src/manifest.ts. SQLite manifests table, UNIQUE(task_id,file,symbol,chunk_id) dedup on upsert. 9 unit tests. 101/101 green. Phase 3 complete.
 - 2026-05-03: Task 3.3 complete — LongTermMemory in packages/memory/src/longterm.ts. facts table (id/text/embedding BLOB/ts/tags). LIKE fallback + cosine-similarity vector search (injected Embedding). `coderelay remember` + `coderelay recall` CLI commands. 9 unit tests. 83/83 green.
 - 2026-05-03: Task 3.2 complete — SessionMemory in packages/memory/src/session.ts. SQLite sessions+session_turns, WAL, FK cascade. Auto-summarize every N turns (injected Summarizer fn), keeps last K turns active. 11 unit tests including 25-turn acceptance scenario. 74/74 tests green.
 - 2026-05-03: Task 3.1 complete — WorkingMemory in packages/memory/src/working.ts. Map<taskId, Map<key, unknown>>, full isolation between tasks. get/set/delete/clear/keys/has API. 10 unit tests. 63/63 tests green.

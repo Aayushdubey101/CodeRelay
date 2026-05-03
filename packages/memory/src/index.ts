@@ -9,3 +9,9 @@ export type { TurnRow, SessionRow, SessionMemoryOptions, Summarizer } from "./se
 
 export { LongTermMemory } from "./longterm.js";
 export type { FactRow, LongTermMemoryOptions, Embedding as LongTermEmbedding } from "./longterm.js";
+
+export { ContextManifest } from "./manifest.js";
+export type { ManifestEntry } from "./manifest.js";
+
+export { ContextPager } from "./pager.js";
+export type { ContextItem, ContextPagerOptions } from "./pager.js";
