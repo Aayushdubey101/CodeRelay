@@ -8,7 +8,7 @@
 ## 🟢 Phase Pointer
 
 **Currently on:** Phase 2 — Indexer + Code Graph
-**Next concrete task:** `2.3 Port graphify extract.py to TypeScript`
+**Next concrete task:** `2.4 6-strategy edge resolver`
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -74,27 +74,29 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        2.3
-Title:     Port graphify extract.py to TypeScript as packages/indexer/src/extract.ts
-From:      work.md → Phase 2 → 2.3
-Acceptance: On a 200-line TS file, extracts ≥95% of expected symbols (manual diff vs graphify Python output).
+ID:        2.4
+Title:     6-strategy edge resolver
+From:      work.md → Phase 2 → 2.4
+Acceptance: On fixture repo, ≥85% of true edges captured (gold set).
 Sub-steps:
-  1. Read external/graphify/src/ (Python) — understand symbol/call extraction logic
-  2. Add web-tree-sitter + tree-sitter grammar WASM packages to indexer deps
-  3. Create packages/indexer/src/extract.ts — SymbolExtractor class:
-       - loadLanguage(lang) — loads WASM grammar for lang
-       - extractSymbols(code, lang, filePath) → SymbolRow[] (inserts into graph DB)
-       - extractEdges(symbols) → EdgeRow[] (call/import/extends edges)
-     Cover: TypeScript, JavaScript, Python, Go, Rust, Java, C/C++
-  4. Wire extracted symbols into graph DB via openGraphDb
-  5. Write fixture test on a 200-line TS file: assert symbol count ≥ expected minimum
-  6. pnpm tsc --noEmit exits 0
+  1. Read packages/indexer/src/extract.ts — understand current ExtractedEdge shape and how dstQualifiedName is currently a raw string
+  2. Create packages/indexer/src/resolver.ts — EdgeResolver class implementing:
+       Strategy 1: exact qualified name match (confidence 1.0)
+       Strategy 2: local scope match (same file/class, confidence 0.95)
+       Strategy 3: file-scope alias match (import aliases, confidence 0.9)
+       Strategy 4: import-resolved (follow import edges to dst module, confidence 0.85)
+       Strategy 5: type-system hint (TypeScript type annotations, confidence 0.75)
+       Strategy 6: fuzzy name match (Levenshtein ≤ 2, confidence 0.5)
+  3. resolve(edges, symbols, fileSymbols) → ResolvedEdge[] with updated dstQualifiedName and confidence
+  4. Write fixture test asserting ≥85% recall on a gold set of 20 known call edges
+  5. pnpm tsc --noEmit exits 0
 ```
 
 ---
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-03: Task 2.3 complete — SymbolExtractor in packages/indexer/src/extract.ts. web-tree-sitter WASM, 8 languages (TS/TSX/JS/Python/Go/Rust/Java/C++), named imports fix. 5 fixture tests: ≥95% symbol coverage, import/heritage/line-number/parent checks. 31/31 tests green. TypeScript strict clean.
 - 2026-05-03: Task 2.2 complete — SQLite graph schema (files/symbols/edges/chunks, WAL, FK cascade). openGraphDb() in packages/indexer/src/db/. `coderelay migrate` CLI command. 9 schema tests. 26/26 tests green.
 - 2026-05-03: Task 2.1 complete — vendored claude-context-core splitter/sync/embedding into packages/indexer/src/upstream/. Stripped Milvus (lancedb-stub.ts). Replaced native tree-sitter with regex TextCodeSplitter (web-tree-sitter in 2.3). 17 tests passing. TypeScript strict typecheck clean.
 - 2026-05-01: Tasks 0.7 + Phase 1 (1.1–1.5) complete — Pino logging, LLMProvider interface, 4 provider adapters (Anthropic/OpenAI/Gemini/Ollama), YAML routing engine with hot-reload, SQLite usage tracking, retry + circuit breaker. `coderelay usage --today` CLI command. 11 tests passing.

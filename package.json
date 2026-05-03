@@ -18,7 +18,17 @@
   },
   "packageManager": "pnpm@10.30.3",
   "pnpm": {
-    "onlyBuiltDependencies": ["better-sqlite3"]
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "tree-sitter-c",
+      "tree-sitter-cpp",
+      "tree-sitter-go",
+      "tree-sitter-java",
+      "tree-sitter-javascript",
+      "tree-sitter-python",
+      "tree-sitter-rust",
+      "tree-sitter-typescript"
+    ]
   },
   "devDependencies": {
     "typescript": "^5.9.3",

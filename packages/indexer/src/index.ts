@@ -5,3 +5,6 @@ export const log: Logger = createLogger("@coderelay/indexer");
 
 export { openGraphDb } from "./db/index.js";
 export type { FileRow, SymbolRow, EdgeRow, ChunkRow } from "./db/index.js";
+
+export { SymbolExtractor } from "./extract.js";
+export type { ExtractedSymbol, ExtractedEdge, ExtractResult, SymbolKind, EdgeKind } from "./extract.js";

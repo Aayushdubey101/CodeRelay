@@ -18,7 +18,15 @@
     "@coderelay/core": "workspace:*",
     "better-sqlite3": "^12.9.0",
     "ollama": "^0.6.3",
-    "openai": "^6.35.0"
+    "openai": "^6.35.0",
+    "tree-sitter-cpp": "^0.23.4",
+    "tree-sitter-go": "^0.25.0",
+    "tree-sitter-java": "^0.23.5",
+    "tree-sitter-javascript": "^0.25.0",
+    "tree-sitter-python": "^0.25.0",
+    "tree-sitter-rust": "^0.24.0",
+    "tree-sitter-typescript": "^0.23.2",
+    "web-tree-sitter": "^0.26.8"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",

@@ -156,8 +156,8 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
   ```
   See `docs/architecture.md` for full DDL.
   *Acceptance:* `pnpm migrate` creates schema, fixture insert + query works.
-* [ ] **2.3** **Port graphify's `extract.py` to TypeScript** as `packages/indexer/src/extract.ts`. Use `web-tree-sitter` instead of `py-tree-sitter`. Cover same languages: TypeScript, JavaScript, Python, Go, Rust, Java, C/C++ (extend later).
-  *Acceptance:* On a 200-line TS file, extracts ≥95% of expected symbols (manual diff vs graphify Python output).
+* [x] **2.3** **Port graphify's `extract.py` to TypeScript** as `packages/indexer/src/extract.ts`. Use `web-tree-sitter` instead of `py-tree-sitter`. Cover same languages: TypeScript, JavaScript, Python, Go, Rust, Java, C/C++ (extend later).
+  *Acceptance:* On a 200-line TS file, extracts ≥95% of expected symbols (manual diff vs graphify Python output). (2026-05-03)
 * [ ] **2.4** **6-strategy edge resolver** (port from Codebase-Memory paper logic):
   1. exact qualified name → 2. local scope → 3. file-scope alias → 4. import-resolved → 5. type-system hint → 6. fuzzy name match (low confidence)
   Confidence stored on each edge.
