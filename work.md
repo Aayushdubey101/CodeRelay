@@ -226,11 +226,11 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
 
 > **Strategy:** Study context-mode's hook redirection, build our own. This is a differentiator — no single upstream does sanitization + secrets + sandbox + rollback as one coherent layer.
 
-* [ ] **6.1** **Permission policy** (YAML): allow/deny shell commands, file paths (writable globs), network egress, env-var access.
-  *Acceptance:* `rm -rf /` is blocked even if sub-agent tries it.
-* [ ] **6.2** **Hard-coded destructive blocklist** (always-on, not user-configurable):
+* [x] **6.1** **Permission policy** (YAML): allow/deny shell commands, file paths (writable globs), network egress, env-var access.
+  *Acceptance:* `rm -rf /` is blocked even if sub-agent tries it. (2026-05-04)
+* [x] **6.2** **Hard-coded destructive blocklist** (always-on, not user-configurable):
   `rm -rf`, `DROP TABLE`, `DROP DATABASE`, `git push --force`, `chmod 777 -R`, `:(){ :|:& };:`, `mkfs`, `dd if=`, etc.
-  *Acceptance:* Each pattern blocked at policy layer with clear error.
+  *Acceptance:* Each pattern blocked at policy layer with clear error. (2026-05-04)
 * [ ] **6.3** **Git worktree sandbox**: every task runs in fresh worktree branch `coderelay/task-<id>`. Merge to main only on explicit approval.
   *Acceptance:* Failed task leaves main untouched.
 * [ ] **6.4** **Action log**: append-only JSONL of every sub-agent action; `coderelay rollback <task-id>` resets to pre-task.
