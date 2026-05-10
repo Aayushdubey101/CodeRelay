@@ -26,7 +26,7 @@ export { mergeResults } from './merger.js';
 export type { MergeResult, MergeConflict } from './merger.js';
 
 export { OrchestratorRunner } from './orchestratorRunner.js';
-export type { OrchestratorOptions, OrchestratorRunResult } from './orchestratorRunner.js';
+export type { OrchestratorOptions, OrchestratorRunResult, OrchestratorProgressEvent, ProgressStatus } from './orchestratorRunner.js';
 
 export { OrchestratorMonitor } from './monitor.js';
 export type { MonitorEvent, BudgetState } from './monitor.js';

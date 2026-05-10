@@ -10,6 +10,16 @@ import type { AgentName } from '@coderelay/sub-agents';
 import type { ExecutorResult } from './executor.js';
 import type { VerifierResult } from './verifier.js';
 
+export type ProgressStatus = 'running' | 'done' | 'failed';
+
+export interface OrchestratorProgressEvent {
+  stepNum: number;
+  totalSteps: number;
+  intent: string;
+  status: ProgressStatus;
+  tokensUsed?: number;
+}
+
 export interface OrchestratorOptions {
   graphDb: GraphDbLike;
   vector?: VectorStoreLike | null;
@@ -23,6 +33,7 @@ export interface OrchestratorOptions {
   repoSummary?: string;
   remember?: (text: string, tags?: string[]) => Promise<void>;
   appendToProjectMd?: (line: string) => Promise<void>;
+  onProgress?: (event: OrchestratorProgressEvent) => void;
 }
 
 export interface OrchestratorRunResult {
@@ -73,6 +84,13 @@ export class OrchestratorRunner {
     for (let i = 0; i < remainingSteps.length; i++) {
       const step = remainingSteps[i]!;
 
+      this.opts.onProgress?.({
+        stepNum: step.step,
+        totalSteps: remainingSteps.length,
+        intent: step.intent,
+        status: 'running',
+      });
+
       const manifest = await this.retriever.retrieve(step);
 
       const result = await this.executor.execute(step, manifest, this.opts.worktree);
@@ -80,6 +98,13 @@ export class OrchestratorRunner {
 
       const verification = await this.verifier.verify(step, { cwd: this.opts.worktree.path });
       allVerifications.push(verification);
+
+      this.opts.onProgress?.({
+        stepNum: step.step,
+        totalSteps: remainingSteps.length,
+        intent: step.intent,
+        status: result.success ? 'done' : 'failed',
+      });
 
       completedSteps.push(step);
       stepOutcomes.push(result.success ? result.output.slice(0, 200) : `FAILED: ${result.error ?? 'unknown'}`);

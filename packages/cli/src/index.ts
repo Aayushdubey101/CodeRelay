@@ -282,7 +282,8 @@ program
   .option("--timeout <ms>", "Timeout in milliseconds", "300000")
   .option("--db <path>", "Path to graph.db", ".coderelay/graph.db")
   .option("--budget <tokens>", "Retriever token budget", "8000")
-  .action(async (prompt: string, opts: { agent: string; model?: string; mcpBin?: string; timeout: string; db: string; budget: string }) => {
+  .option("--tui", "Show live Ink TUI during execution", false)
+  .action(async (prompt: string, opts: { agent: string; model?: string; mcpBin?: string; timeout: string; db: string; budget: string; tui: boolean }) => {
     const agent = opts.agent as AgentName;
     if (agent !== 'claude' && agent !== 'gemini') {
       console.error(`Unknown agent: ${agent}. Use 'claude' or 'gemini'.`);
@@ -312,9 +313,18 @@ program
     const logPath = defaultLogPath(repoRoot);
     const actionLog = new ActionLog(logPath);
 
-    console.log(`\nCreating worktree sandbox...`);
+    if (!opts.tui) console.log(`\nCreating worktree sandbox...`);
     const worktree = await createWorktree({ repoRoot });
-    console.log(`  Branch: ${worktree.branch}\n`);
+    if (!opts.tui) console.log(`  Branch: ${worktree.branch}\n`);
+
+    // Set up TUI if requested
+    let tuiHandle: ReturnType<typeof renderTui> | null = null;
+    const tuiSteps: TuiStep[] = [];
+    let tokenSpend = 0;
+
+    if (opts.tui) {
+      tuiHandle = renderTui({ steps: tuiSteps, currentStep: 0, tokenSpend: 0, recentActions: ['Planning...'] });
+    }
 
     try {
       const runner = new OrchestratorRunner({
@@ -328,15 +338,39 @@ program
         agentName: agent,
         timeoutMs: parseInt(opts.timeout, 10) || 300_000,
         ...(opts.mcpBin !== undefined ? { mcpServerBinPath: opts.mcpBin } : {}),
+        ...(tuiHandle !== null ? {
+          onProgress: (evt: import('@coderelay/orchestrator').OrchestratorProgressEvent) => {
+            const idx = tuiSteps.findIndex((s) => s.step === evt.stepNum);
+            const tuiStep: TuiStep = { step: evt.stepNum, intent: evt.intent, status: evt.status };
+            if (idx >= 0) { tuiSteps[idx] = tuiStep; } else { tuiSteps.push(tuiStep); }
+            tokenSpend += evt.tokensUsed ?? 0;
+            tuiHandle!.update({
+              steps: [...tuiSteps],
+              currentStep: evt.status === 'running' ? evt.stepNum : 0,
+              tokenSpend,
+              recentActions: [`Step ${evt.stepNum}: ${evt.intent} [${evt.status}]`],
+            });
+          },
+        } : {}),
       });
 
       const result = await runner.run(prompt);
+
+      if (tuiHandle !== null) {
+        tuiHandle.update({ steps: tuiSteps.map((s) => ({ ...s, status: 'done' as const })), recentActions: [`Done — ${result.steps.length} steps`] });
+        await new Promise<void>((r) => setTimeout(r, 1500));
+        tuiHandle.clear();
+      }
+
       console.log(`\nTask ${result.taskId.slice(0, 8)} complete.`);
       console.log(`  Steps : ${result.steps.length}`);
       console.log(`  Facts written : ${result.factsWritten}`);
       console.log(`  Drift detected : ${result.driftDetected}`);
       const passed = result.verifications.filter((v) => v.passed).length;
       console.log(`  Verifications : ${passed}/${result.verifications.length} passed\n`);
+    } catch (err) {
+      tuiHandle?.clear();
+      throw err;
     } finally {
       graphDb?.close();
       await removeWorktree(worktree, { repoRoot }).catch(() => { /* best-effort */ });
