@@ -57,7 +57,11 @@ temp/
 
 # Claude Code harness working directory
 mnt/
-.claude/settings.local.json
+.claude/
 
-# prompt.md
-# work.md
+# Workspace specific files
+CLAUDE.md
+prompt.md
+work.md
+DEMO.md
+SUMMARY.md
