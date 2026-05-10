@@ -9,7 +9,7 @@ const CREDENTIALS_PATH = join(homedir(), '.coderelay', 'credentials.json');
 const SALT = 'coderelay-auth-salt-v1';
 const ALG = 'aes-256-gcm' as const;
 
-export type ProviderName = 'anthropic' | 'openai' | 'gemini' | 'openrouter' | 'ollama';
+export type ProviderName = 'anthropic' | 'openai' | 'gemini' | 'openrouter' | 'ollama' | 'lmstudio';
 
 interface EncryptedEntry {
   iv: string;
@@ -96,7 +96,7 @@ export function validateKeyFormat(provider: ProviderName, value: string): string
 }
 
 /** Test if a key actually works by making a minimal real API call. */
-export async function testCredential(provider: ProviderName, apiKey: string, ollamaHost = 'localhost:11434'): Promise<{ ok: boolean; detail: string }> {
+export async function testCredential(provider: ProviderName, apiKey: string, ollamaHost = 'localhost:11434', lmstudioHost = 'localhost:1234'): Promise<{ ok: boolean; detail: string }> {
   try {
     if (provider === 'anthropic') {
       const resp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -141,13 +141,21 @@ export async function testCredential(provider: ProviderName, apiKey: string, oll
       return { ok: resp.ok, detail: resp.ok ? 'Ollama running' : `HTTP ${resp.status}` };
     }
 
+    if (provider === 'lmstudio') {
+      const resp = await fetch(`http://${lmstudioHost}/v1/models`, { signal: AbortSignal.timeout(5000) });
+      if (!resp.ok) return { ok: false, detail: `HTTP ${resp.status}` };
+      const data = await resp.json() as { data?: Array<{ id: string }> };
+      const models = (data.data ?? []).map((m) => m.id);
+      return { ok: true, detail: `${models.length} model(s): ${models.slice(0, 3).join(', ')}` };
+    }
+
     return { ok: false, detail: 'Unknown provider' };
   } catch (err) {
     return { ok: false, detail: String(err) };
   }
 }
 
-const PROVIDERS: ProviderName[] = ['anthropic', 'openai', 'gemini', 'openrouter', 'ollama'];
+const PROVIDERS: ProviderName[] = ['anthropic', 'openai', 'gemini', 'openrouter', 'ollama', 'lmstudio'];
 
 type ConfigureResult = 'saved' | 'skipped' | 'failed';
 
@@ -164,6 +172,18 @@ async function configureProvider(
       return 'saved';
     }
     console.log(`  ○ Ollama not reachable: ${test.detail} (configure manually)`);
+    return 'skipped';
+  }
+
+  if (provider === 'lmstudio') {
+    const host = (await rl.question(`  LM Studio host [localhost:1234]: `)).trim() || 'localhost:1234';
+    const test = await testCredential('lmstudio', '', 'localhost:11434', host);
+    if (test.ok) {
+      saveCredential('lmstudio', host, passphrase || 'lmstudio-no-key');
+      console.log(`  ✓ LM Studio reachable at ${host} — ${test.detail}`);
+      return 'saved';
+    }
+    console.log(`  ○ LM Studio not reachable: ${test.detail} (start LM Studio and load a model)`);
     return 'skipped';
   }
 
@@ -212,23 +232,24 @@ export async function runAuth(): Promise<void> {
       }
     }
 
-    console.log('Providers: (1) Anthropic  (2) OpenAI  (3) Gemini  (4) OpenRouter  (5) Ollama  (6) All  (7) Exit');
+    console.log('Providers: (1) Anthropic  (2) OpenAI  (3) Gemini  (4) OpenRouter  (5) Ollama  (6) LM Studio (local)  (7) All  (8) Exit');
     const choice = (await rl.question('Select: ')).trim();
 
     let selected: ProviderName[];
-    if (choice === '7' || choice.toLowerCase() === 'exit') {
+    if (choice === '8' || choice.toLowerCase() === 'exit') {
       console.log('Exiting.\n'); return;
-    } else if (choice === '6' || choice.toLowerCase() === 'all') {
+    } else if (choice === '7' || choice.toLowerCase() === 'all') {
       selected = [...PROVIDERS];
     } else if (choice === '1') { selected = ['anthropic']; }
     else if (choice === '2') { selected = ['openai']; }
     else if (choice === '3') { selected = ['gemini']; }
     else if (choice === '4') { selected = ['openrouter']; }
     else if (choice === '5') { selected = ['ollama']; }
+    else if (choice === '6') { selected = ['lmstudio']; }
     else { console.error(`Invalid choice: ${choice}`); return; }
 
     let passphrase = '';
-    const nonOllama = selected.filter(p => p !== 'ollama');
+    const nonOllama = selected.filter(p => p !== 'ollama' && p !== 'lmstudio');
     if (nonOllama.length > 0) {
       passphrase = (await rl.question('Encryption passphrase (remember this): ')).trim();
       if (!passphrase) { console.error('Empty passphrase — aborting.'); return; }

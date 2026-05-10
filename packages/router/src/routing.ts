@@ -18,8 +18,8 @@ export interface RoutingConfig {
 
 const DEFAULT_CONFIG: RoutingConfig = {
   routes: [
-    { tag: "embed", provider: "ollama", model: "nomic-embed-text" },
-    { tag: "summarize", provider: "ollama", model: "llama3.2", fallback: "anthropic", fallbackModel: "claude-haiku-4-5-20251001" },
+    { tag: "embed", provider: "ollama", model: "nomic-embed-text", fallback: "lmstudio", fallbackModel: "local-embedding" },
+    { tag: "summarize", provider: "ollama", model: "llama3.2", fallback: "lmstudio", fallbackModel: "local-model" },
     { tag: "classify", provider: "ollama", model: "llama3.2" },
     { tag: "sanitize", provider: "ollama", model: "llama3.2" },
     { tag: "plan", provider: "anthropic", model: "claude-sonnet-4-6", fallback: "openai", fallbackModel: "gpt-4o" },
