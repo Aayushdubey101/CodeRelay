@@ -7,8 +7,8 @@
 
 ## 🟢 Phase Pointer
 
-**Currently on:** Phase 4 — MCP Server
-**Next concrete task:** `6.1 Permission policy`
+**Currently on:** POST-MVP (Phase 10 — Parking Lot)
+**Next concrete task:** See Phase 10 roadmap in `work.md`. All v0.1.0 phases complete.
 
 > When phase finishes, update this pointer + tick all phase boxes below.
 
@@ -19,10 +19,10 @@
 - [x] Phase 3 — Memory System
 - [x] Phase 4 — MCP Server
 - [x] Phase 5 — Sub-Agent Wrapping
-- [ ] Phase 6 — Governance Layer
-- [ ] Phase 7 — Orchestrator Loop
-- [ ] Phase 8 — TUI + DX
-- [ ] Phase 9 — Benchmarks + Release
+- [x] Phase 6 — Governance Layer
+- [x] Phase 7 — Orchestrator Loop
+- [x] Phase 8 — TUI + DX
+- [x] Phase 9 — Benchmarks + Release
 
 ---
 
@@ -74,28 +74,18 @@ RULES:
 
 CURRENT TASK
 ============
-ID:        6.1 + 6.2
-Title:     Permission policy + hard-coded destructive blocklist
-From:      work.md → Phase 6 → 6.1, 6.2
-Acceptance: `rm -rf /` blocked; each destructive pattern blocked at policy layer.
-Sub-steps:
-  1. Create packages/governor/src/policy.ts
-       - Load YAML config: allow/deny lists for commands, file paths, env vars
-       - evaluate(command: string) → { allowed: boolean; reason: string }
-  2. Create packages/governor/src/blocklist.ts
-       - Hard-coded NEVER_ALLOW patterns (rm -rf, DROP TABLE, git push --force, etc.)
-       - check(command: string) → { blocked: boolean; pattern: string } | null
-  3. Create packages/governor/src/governor.ts
-       - check(command) → first runs blocklist, then policy
-  4. Export from packages/governor/src/index.ts
-  5. Unit tests: blocklist catches all patterns, policy allow/deny, governor combines them
-  6. pnpm tsc --noEmit exits 0
+ID:        POST-MVP
+Title:     All v0.1.0 phases complete. See Phase 10 (parking lot) in work.md for future work.
+From:      work.md → Phase 10
+Acceptance: N/A — ship v0.1.0, then pick next feature from Phase 10.
 ```
 
 ---
 
 ## 📅 DONE THIS SESSION
 
+- 2026-05-10: Phase 8+9 complete — TUI (Ink App/PlanView/ActionLogView/render.ts), CLI commands (plan/status/cost/context/explain/run-tui/init), docs (README/configuring.md/safety.md), benchmark harness (bench.ts + benchmarks/README.md). CLI v0.1.0, 250/250 tests green. All phases 0–9 done.
+- 2026-05-10: Phase 7 complete — packages/orchestrator/ with Planner (7.1), Retriever (7.2), Executor (7.3), Verifier (7.4), Realigner (7.5), MemoryUpdater (7.6), index.ts barrel. 17/17 tests green. TypeScript strict clean. Also created CLAUDE.md project config (auto-loaded by Claude Code on session start).
 - 2026-05-04: Task 5.2+5.3+5.4+5.5 complete — sub-agent wrappers in packages/sub-agents/. runClaudeCode (execa, --print, --mcp-config JSON, --disallowedTools, strip CLAUDE* env). runGeminiCli (execa, --yolo, GEMINI.md, ~/.gemini/settings.json). runAgent() dispatcher. `coderelay run --agent <claude|gemini>` CLI command. Phase 5 complete.
 - 2026-05-04: Task 5.1 complete — CAO provider study documented in docs/reuse-map.md §5. Covers Claude Code flags (--mcp-config, --disallowedTools, --append-system-prompt), Gemini CLI (settings.json, GEMINI.md, policy TOML), tool mapping table, and what to port/skip.
 - 2026-05-04: Task 4.3+4.4 complete — 3 MCP resources (repo://structure, repo://project-md, repo://recent-changes) + 3 prompt templates (explain-symbol, refactor-aware, find-bug). Phase 4 complete.

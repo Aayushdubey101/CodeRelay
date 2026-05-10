@@ -1,0 +1,33 @@
+{
+  "name": "coderelay-vscode",
+  "displayName": "CodeRelay",
+  "description": "Live context panel and plan view for CodeRelay",
+  "version": "0.1.0",
+  "publisher": "coderelay",
+  "engines": { "vscode": "^1.85.0" },
+  "license": "MIT",
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "coderelay.showContext", "title": "CodeRelay: Show Context Manifest" },
+      { "command": "coderelay.showPlan",    "title": "CodeRelay: Show Active Plan" },
+      { "command": "coderelay.startDaemon", "title": "CodeRelay: Start Daemon" }
+    ],
+    "views": {
+      "explorer": [
+        { "id": "coderelay.planView", "name": "CodeRelay Plan", "type": "tree" }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.9.3"
+  }
+}

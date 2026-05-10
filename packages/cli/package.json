@@ -1,9 +1,10 @@
 {
   "name": "@coderelay/cli",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
+  "version": "0.1.0",
+  "description": "CLI orchestrator wrapping coding agents with shared graph, memory, and governance",
+  "author": "Aayush Dubey",
   "license": "MIT",
+  "type": "module",
   "bin": {
     "coderelay": "./dist/index.js"
   },
@@ -13,6 +14,10 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json"
@@ -22,13 +27,20 @@
     "@coderelay/governor": "workspace:*",
     "@coderelay/indexer": "workspace:*",
     "@coderelay/memory": "workspace:*",
+    "@coderelay/orchestrator": "workspace:*",
     "@coderelay/router": "workspace:*",
+    "@coderelay/debugger": "workspace:*",
+    "@coderelay/dashboard": "workspace:*",
+    "@coderelay/quality": "workspace:*",
     "@coderelay/sub-agents": "workspace:*",
     "commander": "^12.1.0",
-    "execa": "^9.6.1"
+    "execa": "^9.6.1",
+    "ink": "^5.0.1",
+    "react": "^18.3.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/react": "^18.3.0",
     "typescript": "^5.9.3"
   }
 }

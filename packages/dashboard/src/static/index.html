@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeRelay Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, monospace; background: #0d1117; color: #e6edf3; }
+    header { background: #161b22; border-bottom: 1px solid #30363d; padding: 12px 20px; display: flex; gap: 16px; align-items: center; }
+    header h1 { font-size: 16px; font-weight: 600; }
+    nav a { color: #58a6ff; text-decoration: none; font-size: 14px; }
+    nav a:hover { text-decoration: underline; }
+    main { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 20px; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+    .card h2 { font-size: 13px; font-weight: 600; color: #8b949e; text-transform: uppercase; margin-bottom: 12px; }
+    #stats span { display: inline-block; margin-right: 20px; }
+    #stats b { color: #58a6ff; font-size: 18px; }
+    #log { font-size: 12px; font-family: monospace; max-height: 300px; overflow-y: auto; }
+    .log-entry { padding: 4px 0; border-bottom: 1px solid #21262d; }
+    .log-entry.error { color: #f85149; }
+    .log-entry.warn { color: #e3b341; }
+    canvas { width: 100%; height: 300px; }
+    #facts { font-size: 13px; max-height: 300px; overflow-y: auto; }
+    .fact { padding: 6px 0; border-bottom: 1px solid #21262d; }
+    .fact small { color: #8b949e; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>⚡ CodeRelay</h1>
+    <nav>
+      <a href="/api/graph/stats" target="_blank">Graph API</a>
+      &nbsp;·&nbsp;
+      <a href="/api/tasks" target="_blank">Task Log</a>
+    </nav>
+    <span id="live-indicator" style="margin-left:auto;font-size:12px;color:#3fb950">● Live</span>
+  </header>
+  <main>
+    <div class="card" id="stats-card">
+      <h2>Graph Stats</h2>
+      <div id="stats">Loading…</div>
+    </div>
+    <div class="card">
+      <h2>Long-term Memory</h2>
+      <div id="facts">Loading…</div>
+    </div>
+    <div class="card" style="grid-column:1/-1">
+      <h2>Live Action Log</h2>
+      <div id="log"></div>
+    </div>
+  </main>
+  <script>
+    async function loadStats() {
+      try {
+        const r = await fetch('/api/graph/stats');
+        const d = await r.json();
+        document.getElementById('stats').innerHTML =
+          `<span><b>${d.files}</b> files</span><span><b>${d.symbols}</b> symbols</span><span><b>${d.edges}</b> edges</span>`;
+      } catch { document.getElementById('stats').textContent = 'Graph DB not indexed yet.'; }
+    }
+
+    async function loadFacts() {
+      try {
+        const r = await fetch('/api/memory/facts');
+        const d = await r.json();
+        const el = document.getElementById('facts');
+        el.innerHTML = d.facts.map(f =>
+          `<div class="fact">${f.text}<br><small>${new Date(f.ts).toLocaleString()} · ${f.tags || 'general'}</small></div>`
+        ).join('') || 'No facts yet.';
+      } catch { document.getElementById('facts').textContent = 'Memory DB not available.'; }
+    }
+
+    function connectEvents() {
+      const es = new EventSource('/events');
+      const logEl = document.getElementById('log');
+      es.onmessage = (e) => {
+        const d = JSON.parse(e.data);
+        if (d.type === 'action' && d.data) {
+          const div = document.createElement('div');
+          div.className = 'log-entry';
+          div.textContent = JSON.stringify(d.data);
+          logEl.prepend(div);
+          if (logEl.children.length > 50) logEl.lastElementChild.remove();
+        }
+      };
+      es.onerror = () => { document.getElementById('live-indicator').textContent = '○ Offline'; };
+    }
+
+    loadStats();
+    loadFacts();
+    connectEvents();
+    setInterval(loadStats, 30000);
+  </script>
+</body>
+</html>

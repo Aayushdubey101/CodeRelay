@@ -1,55 +1,112 @@
 # CodeRelay
 
-> A CLI orchestrator that wraps Claude Code, Gemini CLI, Cursor, and other coding agents with a shared codebase graph, persistent memory, and safety governance — so they stop re-reading your repo, stop hallucinating, and stop deleting things they shouldn't.
+> CLI orchestrator that wraps Claude Code, Gemini CLI, and Cursor with a shared **codebase graph**, **tiered memory**, and **governance layer** — cutting token usage by ≥60% and eliminating re-reads of your repo.
 
-**Status:** 🚧 In active development. See [`work.md`](./work.md) for the build plan.
+## Quick Start
 
-## Strategy
+```bash
+npm install -g coderelay
 
-CodeRelay is built by **integrating proven open-source projects** rather than reinventing every wheel. We fork and adapt:
+# 1. Initialize config (auto-detects project type)
+coderelay init
 
-- [`zilliztech/claude-context`](https://github.com/zilliztech/claude-context) (MIT) — MCP server, AST chunker, Merkle-tree incremental indexer, embeddings pipeline
-- [`safishamsi/graphify`](https://github.com/safishamsi/graphify) (MIT) — tree-sitter symbol & call-graph extraction
-- [`awslabs/cli-agent-orchestrator`](https://github.com/awslabs/cli-agent-orchestrator) (Apache 2.0) — sub-agent provider patterns
-- [`mksglu/context-mode`](https://github.com/mksglu/context-mode) — MCP-layer governance pattern
+# 2. Index your repo
+coderelay index .
 
-Full attribution in [`NOTICE.md`](./NOTICE.md). Upstream LICENSE files in [`LICENSES/`](./LICENSES/).
+# 3. Run a task
+coderelay run "rename UserService.email to UserService.primaryEmail everywhere"
 
-Our own code focuses on the **differentiators**: tiered persistent memory, the Plan→Retrieve→Execute→Verify→Re-align loop, and a coherent governance layer.
+# 4. Check what happened
+coderelay status && coderelay log
 
-## What it does
+# 5. Rollback if needed
+coderelay rollback <task-id>
+```
 
-When you run a coding agent through CodeRelay:
-- Your codebase is indexed into a queryable **graph** (symbols, calls, imports) — not just embedded.
-- The agent gets a small set of **smart tools** (`get_symbol`, `get_callers`, etc.) instead of raw `grep`/`Read`.
-- A **memory layer** persists decisions, conventions, and prior work across sessions.
-- A **governance layer** sandboxes every action, blocks destructive commands, and rolls back any task.
-- A **router** sends cheap calls (embeddings, summarization) to local Ollama and only uses Claude/Gemini for the final code-gen step.
+Requires Node ≥ 20. At least one of: Ollama locally, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GEMINI_API_KEY`.
 
-Result: dramatically fewer tokens, fewer hallucinations, fewer rewrites.
+## How it works
 
-## Repo layout
+```
+Your task → CodeRelay → Plan → Retrieve context → Sub-agent → Verify → Re-align → Done
+```
 
-| Path                          | What's there                                            |
-| ----------------------------- | ------------------------------------------------------- |
-| [`work.md`](./work.md)        | Master build plan with checklist                        |
-| [`prompt.md`](./prompt.md)    | Paste-into-Claude-Code session starter                  |
-| [`NOTICE.md`](./NOTICE.md)    | Upstream attributions                                   |
-| [`docs/architecture.md`](./docs/architecture.md) | Design invariants                    |
-| [`docs/reuse-map.md`](./docs/reuse-map.md)       | What to copy from where (filled in Task 0.4) |
-| [`docs/journal.md`](./docs/journal.md)           | Daily blocker log                    |
-| `external/`                   | Git submodules of upstream projects (read-only refs)    |
-| `packages/`                   | Our actual source code (monorepo workspaces)            |
-| `LICENSES/`                   | Preserved upstream LICENSE files                        |
+- **Codebase graph** — tree-sitter AST → SQLite graph + LanceDB vectors. Sub-agents read zero raw files.
+- **Tiered memory** — working (RAM) / session (SQLite) / long-term (SQLite+LanceDB). Decisions persist across sessions.
+- **Governance** — hard-coded destructive blocklist, secret scanner, injection sanitizer, worktree sandbox, rollback.
+- **LLM router** — Ollama for embeddings/summarization, Claude/Gemini for planning/code-gen. Configurable.
 
-## Working on this project
+## Commands
 
-1. Open this repo in Claude Code.
-2. Paste the **Paste-Into-Claude-Code Block** from `prompt.md` as your first message.
-3. Let Claude Code work on the **CURRENT TASK** only.
-4. Tick boxes in `work.md` as acceptance tests pass.
-5. Update `prompt.md` at end of session.
+| Command | Description |
+|---------|-------------|
+| `coderelay init` | Create `coderelay.yaml` (auto-detects project type) |
+| `coderelay index <path>` | Index source files into code graph |
+| `coderelay run <prompt>` | Run a task via sub-agent |
+| `coderelay run-tui <prompt>` | Same, with live TUI (plan + step + tokens) |
+| `coderelay plan <task>` | Show execution plan without running |
+| `coderelay status` | Show recent orchestrator activity |
+| `coderelay log [--task <id>]` | Show action log |
+| `coderelay rollback <task-id>` | Revert a task |
+| `coderelay graph stats` | Code graph statistics |
+| `coderelay search <query>` | Search indexed chunks |
+| `coderelay context <query>` | Show context chunks for a query |
+| `coderelay explain <query>` | Explain context retrieval reasoning |
+| `coderelay remember <text>` | Save fact to long-term memory |
+| `coderelay recall <query>` | Search long-term memory |
+| `coderelay cost` | Detailed token cost breakdown |
+| `coderelay usage --today` | Token usage summary |
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        CODERELAY                                │
+│  Indexer ──► SQLite graph + LanceDB vectors                     │
+│  Memory  ──► Working / Session / Long-term                      │
+│  Governor ──► Blocklist + Policy + Sandbox + Scanner            │
+│  Router  ──► Anthropic / OpenAI / Gemini / Ollama              │
+│                                                                 │
+│  Plan → Retrieve → Execute → Verify → Re-align → (loop)        │
+│                        │                                        │
+│                   MCP stdio bridge                              │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+         ┌─────────────────┼──────────────────┐
+         ▼                 ▼                  ▼
+    Claude Code       Gemini CLI          Cursor / Editor
+```
+
+## Configuration
+
+`coderelay init` generates a starter `coderelay.yaml`. Full reference: [docs/configuring.md](docs/configuring.md).
+
+```yaml
+version: 1
+project:
+  type: typescript
+router:
+  defaultProvider: ollama
+routing:
+  plan: anthropic
+  code-gen: anthropic
+  embed: ollama
+```
+
+## Safety
+
+Hard-coded (never user-configurable) destructive blocklist: `rm -rf`, `DROP TABLE/DATABASE`, `git push --force`, fork bombs, and more. Full details: [docs/safety.md](docs/safety.md).
+
+## Built on open source
+
+| Upstream | License | Used for |
+|---------|---------|---------|
+| [zilliztech/claude-context](https://github.com/zilliztech/claude-context) | MIT | MCP scaffold, AST chunker, Merkle indexer |
+| [safishamsi/graphify](https://github.com/safishamsi/graphify) | MIT | Tree-sitter symbol/call extraction |
+| [awslabs/cli-agent-orchestrator](https://github.com/awslabs/cli-agent-orchestrator) | Apache 2.0 | Sub-agent provider patterns |
+
+Full attribution: [NOTICE.md](NOTICE.md). License files: [LICENSES/](LICENSES/).
 
 ## License
 
-MIT. See [`LICENSE`](./LICENSE) and [`NOTICE.md`](./NOTICE.md).
+MIT — see [LICENSE](LICENSE).

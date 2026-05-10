@@ -1,6 +1,6 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 
@@ -14,6 +14,7 @@ export interface CheckRow {
 }
 
 export type ToolChecker = (cmd: string, args: string[]) => Promise<{ ok: boolean; detail: string }>;
+export type HttpChecker = (url: string) => Promise<{ ok: boolean; detail: string }>;
 
 export async function defaultToolChecker(cmd: string, args: string[]): Promise<{ ok: boolean; detail: string }> {
   try {
@@ -25,7 +26,27 @@ export async function defaultToolChecker(cmd: string, args: string[]): Promise<{
   }
 }
 
-export async function gatherChecks(checkTool: ToolChecker = defaultToolChecker): Promise<CheckRow[]> {
+export async function defaultHttpChecker(url: string): Promise<{ ok: boolean; detail: string }> {
+  try {
+    const resp = await fetch(url, { signal: AbortSignal.timeout(3000) });
+    return { ok: resp.ok, detail: resp.ok ? `HTTP ${resp.status}` : `HTTP ${resp.status}` };
+  } catch {
+    return { ok: false, detail: 'not reachable' };
+  }
+}
+
+const DEFAULT_CONFIG = {
+  version: 1,
+  router: { defaultProvider: 'ollama' },
+  agents: { default: 'claude', timeoutMs: 300000 },
+  indexer: { dbPath: '.coderelay/graph.db' },
+  memory: { sessionDb: '.coderelay/session.db', longTermDb: '.coderelay/longterm.db' },
+};
+
+export async function gatherChecks(
+  checkTool: ToolChecker = defaultToolChecker,
+  checkHttp: HttpChecker = defaultHttpChecker,
+): Promise<CheckRow[]> {
   const checks: CheckRow[] = [];
 
   const major = parseInt(process.version.slice(1), 10);
@@ -43,12 +64,23 @@ export async function gatherChecks(checkTool: ToolChecker = defaultToolChecker):
   const gemini = await checkTool('gemini', ['--version']);
   checks.push({ name: 'gemini CLI', required: false, ok: gemini.ok, detail: gemini.ok ? gemini.detail : 'not found — npm i -g @google/gemini-cli' });
 
-  const ollama = await checkTool('ollama', ['--version']);
-  checks.push({ name: 'ollama', required: false, ok: ollama.ok, detail: ollama.ok ? ollama.detail : 'not found — ollama.ai' });
+  const ollama = await checkHttp('http://localhost:11434/api/tags');
+  checks.push({ name: 'ollama', required: false, ok: ollama.ok, detail: ollama.ok ? 'running on :11434' : 'not running — ollama.ai' });
 
   const dir = join(homedir(), '.coderelay');
   try {
     mkdirSync(dir, { recursive: true });
+
+    const configPath = join(dir, 'config.json');
+    if (!existsSync(configPath)) {
+      writeFileSync(configPath, JSON.stringify(DEFAULT_CONFIG, null, 2), 'utf8');
+    }
+
+    const credPath = join(dir, 'credentials.json');
+    if (!existsSync(credPath)) {
+      writeFileSync(credPath, '{}', 'utf8');
+    }
+
     checks.push({ name: '~/.coderelay/', required: true, ok: true, detail: dir });
   } catch (err) {
     checks.push({ name: '~/.coderelay/', required: true, ok: false, detail: String(err) });
@@ -77,5 +109,6 @@ export async function runSetup(): Promise<void> {
     console.log(`\n${failures.length} required check(s) failed.\n`);
     process.exit(1);
   }
-  console.log('\nAll required checks passed.\n');
+  console.log('\nAll required checks passed.');
+  console.log('\nRun coderelay auth next to configure your AI providers.\n');
 }
