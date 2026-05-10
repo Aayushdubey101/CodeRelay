@@ -1,5 +1,5 @@
 {
-  "name": "@coderelay/sub-agents",
+  "name": "@coderelay/orchestrator",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -17,9 +17,14 @@
   "dependencies": {
     "@coderelay/core": "workspace:*",
     "@coderelay/governor": "workspace:*",
-    "execa": "^9.6.1"
+    "@coderelay/indexer": "workspace:*",
+    "@coderelay/memory": "workspace:*",
+    "@coderelay/sub-agents": "workspace:*",
+    "execa": "^9.6.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "typescript": "^5.9.3"
   }
 }

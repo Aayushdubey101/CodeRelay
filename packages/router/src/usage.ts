@@ -82,6 +82,12 @@ export class UsageTracker {
       .all(startOfDay.getTime()) as UsageEntry[];
   }
 
+  queryAll(): UsageEntry[] {
+    return this.db
+      .prepare(`SELECT * FROM usage ORDER BY ts DESC`)
+      .all() as UsageEntry[];
+  }
+
   queryRange(fromTs: number, toTs: number): UsageEntry[] {
     return this.db
       .prepare(`SELECT * FROM usage WHERE ts >= ? AND ts <= ? ORDER BY ts DESC`)

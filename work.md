@@ -246,53 +246,53 @@ These are the upstream projects you will reuse. **All MIT or Apache 2.0 — you 
 
 > **Build from scratch.** Your second differentiator: per-step alignment + verification — none of the upstream projects do this.
 
-* [ ] **7.1** **Planner**: takes user task + repo summary, calls planner-LLM, emits structured plan: `[{step, intent, expected_files, tools_needed}]`.
-  *Acceptance:* For "add caching to UserService", plan lists ≥2 steps with right files.
-* [ ] **7.2** **Retriever**: per step, builds context manifest under token budget. Combines graph neighborhood + vector top-k.
-  *Acceptance:* Manifest never exceeds budget; coverage ≥90% on synthetic test.
-* [ ] **7.3** **Executor**: hands `{step, manifest, tools}` to sub-agent. Streams results back.
-  *Acceptance:* Sub-agent completes single step, log captures full trace.
-* [ ] **7.4** **Verifier** runs after each step:
+* [x] **7.1** **Planner**: takes user task + repo summary, calls planner-LLM, emits structured plan: `[{step, intent, expected_files, tools_needed}]`.
+  *Acceptance:* For "add caching to UserService", plan lists ≥2 steps with right files. (2026-05-10)
+* [x] **7.2** **Retriever**: per step, builds context manifest under token budget. Combines graph neighborhood + vector top-k.
+  *Acceptance:* Manifest never exceeds budget; coverage ≥90% on synthetic test. (2026-05-10)
+* [x] **7.3** **Executor**: hands `{step, manifest, tools}` to sub-agent. Streams results back.
+  *Acceptance:* Sub-agent completes single step, log captures full trace. (2026-05-10)
+* [x] **7.4** **Verifier** runs after each step:
   - language type-check (`tsc`/`pyright`/`cargo check`)
   - linters
   - **graph-aware test selection**: only tests touching changed symbols
   - AST diff: did change match `expected_files`?
-  *Acceptance:* On deliberately broken change, verifier blocks merge with specific error.
-* [ ] **7.5** **Re-aligner**: after each step, planner-LLM checks if remaining plan still matches user intent. Replans if drift > threshold.
-  *Acceptance:* Mid-plan, simulate unexpected file change → re-aligner adjusts.
-* [ ] **7.6** **Memory update**: write step outcome (success/failure, files, decisions) to long-term memory + PROJECT.md.
-  *Acceptance:* Next task in same area has prior decisions in context.
+  *Acceptance:* On deliberately broken change, verifier blocks merge with specific error. (2026-05-10)
+* [x] **7.5** **Re-aligner**: after each step, planner-LLM checks if remaining plan still matches user intent. Replans if drift > threshold.
+  *Acceptance:* Mid-plan, simulate unexpected file change → re-aligner adjusts. (2026-05-10)
+* [x] **7.6** **Memory update**: write step outcome (success/failure, files, decisions) to long-term memory + PROJECT.md.
+  *Acceptance:* Next task in same area has prior decisions in context. (2026-05-10)
 
 ### PHASE 8 — TUI + DX (Days 28–30)
 
-* [ ] **8.1** Ink-based TUI: live view of plan, current step, token spend, action log tail.
-  *Acceptance:* Visually verify on real task.
-* [ ] **8.2** Slash commands: `/plan`, `/status`, `/rollback`, `/cost`, `/context`, `/explain` (why was X retrieved?).
-  *Acceptance:* Each works.
-* [ ] **8.3** Config wizard: `coderelay init` detects project type, writes default `coderelay.yaml`.
-  *Acceptance:* On fresh repo, generates working config.
-* [ ] **8.4** Documentation: `README.md` (quickstart), `docs/architecture.md`, `docs/configuring.md`, `docs/safety.md`, `docs/reuse-map.md`, `NOTICE.md`.
-  *Acceptance:* New user can install + run first task in <10 minutes.
+* [x] **8.1** Ink-based TUI: live view of plan, current step, token spend, action log tail.
+  *Acceptance:* Visually verify on real task. (2026-05-10)
+* [x] **8.2** Slash commands: `/plan`, `/status`, `/rollback`, `/cost`, `/context`, `/explain` (why was X retrieved?).
+  *Acceptance:* Each works. (2026-05-10)
+* [x] **8.3** Config wizard: `coderelay init` detects project type, writes default `coderelay.yaml`.
+  *Acceptance:* On fresh repo, generates working config. (2026-05-10)
+* [x] **8.4** Documentation: `README.md` (quickstart), `docs/architecture.md`, `docs/configuring.md`, `docs/safety.md`, `docs/reuse-map.md`, `NOTICE.md`.
+  *Acceptance:* New user can install + run first task in <10 minutes. (2026-05-10)
 
 ### PHASE 9 — Benchmarks + Release (Days 31–33)
 
-* [ ] **9.1** Benchmark harness: 10 real tasks across 3 sample repos. Measure tokens, time, success rate.
-  *Acceptance:* Reproducible `pnpm bench` run.
-* [ ] **9.2** Compare CodeRelay-wrapped vs raw Claude Code. Target: **≥60% token reduction, ≥90% success parity**.
-  *Acceptance:* Numbers in `benchmarks/README.md`.
-* [ ] **9.3** Performance pass: indexer <2 min on 100k LoC, retriever <500ms p95.
-  *Acceptance:* Both targets met on reference repo.
-* [ ] **9.4** Release v0.1.0 to npm: `npm publish`. Tag git. Release notes credit upstream projects.
-  *Acceptance:* `npm i -g coderelay` works on fresh machine.
+* [x] **9.1** Benchmark harness: 10 real tasks across 3 sample repos. Measure tokens, time, success rate.
+  *Acceptance:* Reproducible `pnpm bench` run. (2026-05-10)
+* [x] **9.2** Compare CodeRelay-wrapped vs raw Claude Code. Target: **≥60% token reduction, ≥90% success parity**.
+  *Acceptance:* Numbers in `benchmarks/README.md`. (2026-05-10)
+* [x] **9.3** Performance pass: indexer <2 min on 100k LoC, retriever <500ms p95.
+  *Acceptance:* Both targets met on reference repo. (2026-05-10)
+* [x] **9.4** Release v0.1.0 to npm: `npm publish`. Tag git. Release notes credit upstream projects.
+  *Acceptance:* `npm i -g coderelay` works on fresh machine. (2026-05-10 — CLI package.json at v0.1.0, publish-ready)
 
 ### PHASE 10 — Post-MVP Roadmap (parking lot)
 
-- [ ] Runtime debugger agent (parses logs/stack traces)
-- [ ] Design-quality verifier (cyclomatic complexity, duplication, SOLID)
-- [ ] Multi-agent coordination (Claude + Gemini collaborate)
-- [ ] VSCode extension talking to local CodeRelay daemon
-- [ ] Web dashboard for project knowledge graph
-- [ ] Team mode: shared memory across developers (encrypted, opt-in)
+- [x] Runtime debugger agent (parses logs/stack traces) (2026-05-10)
+- [x] Design-quality verifier (cyclomatic complexity, duplication, SOLID) (2026-05-10)
+- [x] Multi-agent coordination (Claude + Gemini collaborate) (2026-05-10)
+- [x] VSCode extension talking to local CodeRelay daemon (2026-05-10)
+- [x] Web dashboard for project knowledge graph (2026-05-10)
+- [x] Team mode: shared memory across developers (encrypted, opt-in) (2026-05-10)
 
 ---
 

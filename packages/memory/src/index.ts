@@ -15,3 +15,6 @@ export type { ManifestEntry } from "./manifest.js";
 
 export { ContextPager } from "./pager.js";
 export type { ContextItem, ContextPagerOptions } from "./pager.js";
+
+export { TeamStore, TeamSyncer, encrypt, decrypt, deriveKey } from "./team/index.js";
+export type { SharedFact, LocalWriter } from "./team/index.js";

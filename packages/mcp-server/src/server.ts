@@ -16,10 +16,15 @@ import { LongTermMemory } from '@coderelay/memory';
 import { appendFileSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
+export interface VectorStoreLike {
+  search(query: string, topK: number): Promise<Array<{ content: string; metadata: Record<string, unknown> }>>;
+}
+
 export interface CodeRelayServerOptions {
   graphDbPath?: string;
   longTermDbPath?: string;
   projectMdPath?: string;
+  vectorStore?: VectorStoreLike | undefined;
 }
 
 interface SymbolRow { id: number; name: string; qualified_name: string; kind: string; signature: string | null; start: number; end: number; file_id: number; }
@@ -58,24 +63,35 @@ function buildServer(opts: CodeRelayServerOptions): McpServer {
       inputSchema: { query: z.string(), max_tokens: z.number().int().positive().default(4000) },
     },
     async ({ query, max_tokens }) => {
-      const rows = db()
-        .prepare<[string, number], ChunkRow & { path: string }>(
-          `SELECT c.content, c.token_count, f.path
-           FROM chunks c
-           JOIN files f ON c.file_id = f.id
-           WHERE c.content LIKE ?
-           ORDER BY c.token_count ASC
-           LIMIT ?`,
-        )
-        .all(`%${query}%`, 50) as Array<ChunkRow & { path: string }>;
-
       let budget = max_tokens;
       const selected: Array<{ path: string; content: string; tokens: number }> = [];
-      for (const r of rows) {
-        if (r.token_count > budget) continue;
-        selected.push({ path: r.path, content: r.content, tokens: r.token_count });
-        budget -= r.token_count;
-        if (budget <= 0) break;
+
+      if (opts.vectorStore !== undefined) {
+        const vecResults = await opts.vectorStore.search(query, 50);
+        for (const r of vecResults) {
+          const tokens = Math.ceil((r.content.length) / 4);
+          if (tokens > budget) continue;
+          selected.push({ path: String(r.metadata['path'] ?? '(unknown)'), content: r.content, tokens });
+          budget -= tokens;
+          if (budget <= 0) break;
+        }
+      } else {
+        const rows = db()
+          .prepare<[string, number], ChunkRow & { path: string }>(
+            `SELECT c.content, c.token_count, f.path
+             FROM chunks c
+             JOIN files f ON c.file_id = f.id
+             WHERE c.content LIKE ?
+             ORDER BY c.token_count ASC
+             LIMIT ?`,
+          )
+          .all(`%${query}%`, 50) as Array<ChunkRow & { path: string }>;
+        for (const r of rows) {
+          if (r.token_count > budget) continue;
+          selected.push({ path: r.path, content: r.content, tokens: r.token_count });
+          budget -= r.token_count;
+          if (budget <= 0) break;
+        }
       }
 
       return {
@@ -209,6 +225,12 @@ function buildServer(opts: CodeRelayServerOptions): McpServer {
       inputSchema: { query: z.string(), k: z.number().int().positive().default(10) },
     },
     async ({ query, k }) => {
+      if (opts.vectorStore !== undefined) {
+        const vecResults = await opts.vectorStore.search(query, k);
+        return {
+          content: [{ type: 'text' as const, text: JSON.stringify({ query, results: vecResults.map((r) => ({ path: String(r.metadata['path'] ?? '(unknown)'), content: r.content.slice(0, 400), tokens: Math.ceil(r.content.length / 4) })) }) }],
+        };
+      }
       const rows = db()
         .prepare<[string, number], ChunkRow & { path: string }>(
           `SELECT c.content, c.token_count, f.path
@@ -233,7 +255,12 @@ function buildServer(opts: CodeRelayServerOptions): McpServer {
       inputSchema: { snippet: z.string(), k: z.number().int().positive().default(5) },
     },
     async ({ snippet, k }) => {
-      // SQL LIKE fallback — take first 40 chars of snippet as search key
+      if (opts.vectorStore !== undefined) {
+        const vecResults = await opts.vectorStore.search(snippet, k);
+        return {
+          content: [{ type: 'text' as const, text: JSON.stringify({ results: vecResults.map((r) => ({ path: String(r.metadata['path'] ?? '(unknown)'), preview: r.content.slice(0, 300) })) }) }],
+        };
+      }
       const keyword = snippet.trim().slice(0, 40);
       const rows = db()
         .prepare<[string, number], ChunkRow & { path: string }>(

@@ -8,4 +8,5 @@ export type {
   VectorDatabase,
 } from './types.js';
 
+export { LanceVectorStore } from './lancedb.js';
 export { LanceDBStub } from './lancedb-stub.js';
