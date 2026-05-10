@@ -20,7 +20,7 @@
     "removeComments": false,
     "resolveJsonModule": true
   },
-  "include": ["packages/**/*", "src/**/*"],
+  "include": ["packages/**/*"],
   "exclude": [
     "node_modules",
     "dist",
