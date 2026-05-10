@@ -496,10 +496,10 @@ program
   .description("Initialize coderelay.yaml for this project (auto-detects project type)")
   .option("--force", "Overwrite existing coderelay.yaml", false)
   .option("--dir <path>", "Target directory (default: cwd)")
-  .action((opts: { force: boolean; dir?: string }) => {
+  .action(async (opts: { force: boolean; dir?: string }) => {
     const initOpts: InitOptions = { force: opts.force };
     if (opts.dir !== undefined) initOpts.dir = opts.dir;
-    runInit(initOpts);
+    await runInit(initOpts);
   });
 
 // --- plan (8.2) ---

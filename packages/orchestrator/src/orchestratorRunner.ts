@@ -5,6 +5,7 @@ import { Executor } from './executor.js';
 import { Verifier } from './verifier.js';
 import { Realigner } from './realigner.js';
 import { MemoryUpdater } from './memoryUpdate.js';
+import { OrchestratorMonitor, type MonitorEvent } from './monitor.js';
 import type { ActionLog, WorktreeInfo } from '@coderelay/governor';
 import type { AgentName } from '@coderelay/sub-agents';
 import type { ExecutorResult } from './executor.js';
@@ -34,6 +35,8 @@ export interface OrchestratorOptions {
   remember?: (text: string, tags?: string[]) => Promise<void>;
   appendToProjectMd?: (line: string) => Promise<void>;
   onProgress?: (event: OrchestratorProgressEvent) => void;
+  onMonitorEvent?: (event: MonitorEvent) => void;
+  tokenBudget?: number;
 }
 
 export interface OrchestratorRunResult {
@@ -52,6 +55,7 @@ export class OrchestratorRunner {
   private readonly verifier: Verifier;
   private readonly realigner: Realigner;
   private readonly memoryUpdater: MemoryUpdater;
+  private readonly monitor: OrchestratorMonitor;
 
   constructor(private readonly opts: OrchestratorOptions) {
     this.planner = new Planner(opts.llm);
@@ -66,11 +70,20 @@ export class OrchestratorRunner {
     this.verifier = new Verifier();
     this.realigner = new Realigner(opts.llm);
     this.memoryUpdater = new MemoryUpdater(opts.llm);
+    this.monitor = new OrchestratorMonitor();
+  }
+
+  async plan(task: string): Promise<PlanStep[]> {
+    const repoSummary = this.opts.repoSummary ?? '';
+    const { steps } = await this.planner.plan({ task, repoSummary });
+    return steps;
   }
 
   async run(task: string): Promise<OrchestratorRunResult> {
     const taskId = randomUUID();
     const repoSummary = this.opts.repoSummary ?? '';
+    const tokenBudget = this.opts.tokenBudget ?? 100_000;
+    let tokensUsed = 0;
 
     const { steps: initialSteps } = await this.planner.plan({ task, repoSummary });
 
@@ -96,6 +109,9 @@ export class OrchestratorRunner {
       const result = await this.executor.execute(step, manifest, this.opts.worktree);
       allResults.push(result);
 
+      // Approximate token usage from output length (4 chars ≈ 1 token)
+      tokensUsed += Math.ceil(result.output.length / 4);
+
       const verification = await this.verifier.verify(step, { cwd: this.opts.worktree.path });
       allVerifications.push(verification);
 
@@ -104,7 +120,20 @@ export class OrchestratorRunner {
         totalSteps: remainingSteps.length,
         intent: step.intent,
         status: result.success ? 'done' : 'failed',
+        tokensUsed,
       });
+
+      // Monitor checks
+      if (this.opts.onMonitorEvent) {
+        const changedFiles = result.output.match(/[^\s]+\.[a-zA-Z]{1,6}/g) ?? [];
+        const events = this.monitor.checkAll({
+          budget: { used: tokensUsed, total: tokenBudget },
+          expectedFiles: step.expectedFiles,
+          changedFiles,
+          step: step.step,
+        });
+        for (const ev of events) this.opts.onMonitorEvent(ev);
+      }
 
       completedSteps.push(step);
       stepOutcomes.push(result.success ? result.output.slice(0, 200) : `FAILED: ${result.error ?? 'unknown'}`);
