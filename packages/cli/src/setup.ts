@@ -1,10 +1,11 @@
-import { execFile } from 'node:child_process';
+import { execFile, exec } from 'node:child_process';
 import { promisify } from 'node:util';
 import { mkdirSync, existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 
-const execAsync = promisify(execFile);
+const execFileAsync = promisify(execFile);
+const execShellAsync = promisify(exec);
 
 export interface CheckRow {
   name: string;
@@ -18,7 +19,14 @@ export type HttpChecker = (url: string) => Promise<{ ok: boolean; detail: string
 
 export async function defaultToolChecker(cmd: string, args: string[]): Promise<{ ok: boolean; detail: string }> {
   try {
-    const { stdout } = await execAsync(cmd, args, { timeout: 5000 });
+    let stdout: string;
+    if (process.platform === 'win32') {
+      const result = await execShellAsync(`${cmd} ${args.join(' ')}`, { timeout: 5000 });
+      stdout = result.stdout;
+    } else {
+      const result = await execFileAsync(cmd, args, { timeout: 5000 });
+      stdout = result.stdout;
+    }
     const line = (stdout ?? '').trim().split('\n')[0] ?? '';
     return { ok: true, detail: line };
   } catch {
